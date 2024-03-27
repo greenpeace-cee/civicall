@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+
+<table>
+  <base>CRM/Civicall</base>
+  <class>CallLogs</class>
+  <name>civicrm_call_logs</name>
+  <comment>Call logs</comment>
+  <log>true</log>
+
+  <field>
+    <name>id</name>
+    <type>int unsigned</type>
+    <required>true</required>
+    <comment>Unique CallLogs ID</comment>
+  </field>
+  <primaryKey>
+    <name>id</name>
+    <autoincrement>true</autoincrement>
+  </primaryKey>
+
+  <field>
+    <name>activity_id</name>
+    <type>int unsigned</type>
+    <comment>FK to Activity</comment>
+    <required>true</required>
+  </field>
+  <foreignKey>
+    <name>activity_id</name>
+    <table>civicrm_activity</table>
+    <key>id</key>
+    <onDelete>CASCADE</onDelete>
+  </foreignKey>
+
+  <field>
+    <name>call_start_date</name>
+    <type>datetime</type>
+    <comment>Call start date</comment>
+    <required>true</required>
+  </field>
+
+  <field>
+    <name>call_end_date</name>
+    <type>datetime</type>
+    <comment>Call end date</comment>
+    <required>true</required>
+  </field>
+
+  <field>
+    <name>created_by_contact_id</name>
+    <type>int unsigned</type>
+    <comment>Created by contact, FK to Contact</comment>
+    <required>true</required>
+  </field>
+
+  <field>
+    <name>call_response_option_value_id</name>
+    <type>int unsigned</type>
+    <comment>Call response, FK to OptionValue</comment>
+    <required>true</required>
+  </field>
+
+</table>

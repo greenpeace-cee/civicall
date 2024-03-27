@@ -1,0 +1,33 @@
+{
+  "pageLoader": [
+    {
+      "afformModuleName" : "testModule",
+      "isCollapsed" : "false",
+      "title": "Dynamic content 1"
+    },
+    {
+      "afformModuleName" : "superTestModule",
+      "isCollapsed" : "false",
+      "title": "Dynamic content 2"
+    }
+  ],
+  "scheduleOffsets": [
+    "1: +1 day",
+    "3: +7 days",
+    "0: +1 day",
+    "2: +2 days",
+    "4: +30 days"
+  ],
+  "finalResponseNames": [
+    "empty_response",
+    "response_option_value_name_1",
+    "response_option_value_name_2"
+  ],
+  "preliminaryResponseNames": [
+    "empty_response",
+    "response_option_value_name_1",
+    "response_option_value_name_2"
+  ],
+  "responseLimit": 3,
+  "isShowTimer": true
+}
