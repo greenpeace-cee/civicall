@@ -13,6 +13,7 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Civicall_Form_CivicallFor
 
   public $activity = [];
   public $callLogsCount = 0;
+  public $isFormInPopup = false;
 
   /**
    * @var CallCenterConfiguration
@@ -24,26 +25,31 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Civicall_Form_CivicallFor
 
     $activityId = CRM_Utils_Request::retrieve('activity_id', 'Integer', $this);
     if (empty($activityId)) {
-      throw new Exception('Cannot find activity id.');
+      $this->showError('Cannot find activity id.');
     }
 
     $this->activity = CivicallUtils::getActivity($activityId);
     if (empty($this->activity)) {
-      throw new Exception('Cannot find activity.');
+      $this->showError('Cannot find activity.');
     }
 
     if ($this->activity['isCallCenterEnabled'] !== true) {
-      throw new Exception('CallCenter not enabled for target campaign');
+      $this->showError('CallCenter not enabled for target campaign');
     }
 
     $targetContact = CivicallUtils::getCallCenterTargetContact($activityId);
     if (empty($targetContact)) {
-      throw new Exception('Cannot find contact.');
+      $this->showError('Cannot find contact.');
     }
 
     $targetCampaign = CivicallUtils::getCallCenterTargetCampaign($activityId);
     if (empty($targetCampaign)) {
-      throw new Exception('Cannot find campaign.');
+      $this->showError('Cannot find campaign.');
+    }
+
+    $isJsonSnippet = CRM_Utils_Request::retrieve('snippet', 'String', $this) === 'json';
+    if ($isJsonSnippet) {
+      $this->isFormInPopup = true;
     }
 
     $this->callCenterConfiguration = new CallCenterConfiguration($this->activity['campaignConfiguration']);
@@ -63,12 +69,13 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Civicall_Form_CivicallFor
     $this->assign('rescheduleButtonName', self::getRescheduleButtonName());
     $this->assign('closeAndSaveButtonName', self::getCloseAndSaveButtonName());
     $this->assign('closeAndWithoutSaveButtonName', self::getCloseAndWithoutSaveButtonName());
+    $this->assign('isFormInPopup', $this->isFormInPopup);
     parent::preProcess();
   }
 
   public function buildQuickForm(): void {
-    $preliminaryResponseOptions = CallResponses::getResponseOptions($this->callCenterConfiguration->getPreliminaryResponseNames());
-    $finalResponseOptions = CallResponses::getResponseOptions($this->callCenterConfiguration->getAvailableResponseOptionValueNames());
+    $preliminaryResponseOptions = $this->callCenterConfiguration->getPreliminaryResponseOptions();
+    $finalResponseOptions = $this->callCenterConfiguration->getAvailableResponseOptions();
 
     $this->add('textarea', 'notes', ts('Notes'), ['cols' => 50, 'rows' => 6, 'class' => 'civicall__input civicall--textarea civicall--width-100-percent']);
     $this->add('datepicker', 'scheduled_call_date', 'Scheduled Call Date', ['class' => 'civicall__input civicall--datepicker'], FALSE, ['minDate' => date('Y-m-d')]);
@@ -216,6 +223,15 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Civicall_Form_CivicallFor
     }
 
     return $defaults;
+  }
+
+  public function showError($message) {
+    // To show error message redirect to error page. Exception messages doesn't show at popups.
+    if ($this->isFormInPopup) {
+      CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/civicall/error', 'reset=1&error-message=' . urlencode($message)));
+    }
+
+    throw new Exception($message);
   }
 
 }

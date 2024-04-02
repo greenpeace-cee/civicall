@@ -1,3 +1,11 @@
+.call-center__wrap
+  &.call-center__popup-from
+    .call-center__action-wrap:last-child
+      border-bottom: none
+
+    .call-center__buttons-wrap
+      display: none
+
 .call-center__form-title
   font-size: 24px
   padding-bottom: 20px
@@ -94,3 +102,26 @@
 
 .call-center__action-row-item-title
   padding-bottom: 7px
+
+.ui-dialog-buttonpane > .ui-dialog-buttonset > button[data-identifier="_qf_CivicallCallCenter_cancel"]
+  cursor: pointer
+  box-sizing: border-box !important
+  display: flex !important
+  font-family: "Open Sans","Helvetica Neue",Helvetica,Arial,sans-serif
+  border: none !important
+  align-items: center
+  justify-content: center
+  gap: 7px
+  transition: 0.3s
+  color: white !important
+  background: $red !important
+  &:hover
+    background: $redDarken !important
+  & > .ui-icon
+    display: flex
+    align-items: center
+    justify-content: center
+    margin: 0 !important
+    padding: 0 !important
+    width: 100% !important
+    height: 100% !important

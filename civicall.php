@@ -2,6 +2,7 @@
 
 require_once 'civicall.civix.php';
 
+use Civi\Utils\CivicallSettings;
 use CRM_Civicall_ExtensionUtil as E;
 
 /**
@@ -37,16 +38,11 @@ function civicall_civicrm_navigationMenu(&$menu) {
 
 function civicall_civicrm_validateForm($formName, &$fields, &$files, &$form, &$errors) {
   if ($formName === CRM_Campaign_Form_Campaign::class) {
-    $configurationCustomField = \Civi\Api4\CustomField::get()
-      ->addSelect( 'id', 'custom_group_id')
-      ->addWhere('custom_group_id:name', '=', 'civicall_call_configuration')
-      ->addWhere('name', '=', 'configuration')
-      ->execute()
-      ->first();
+    $configurationCustomFieldId = CivicallSettings::getCallConfigurationCustomFieldId();
 
     if (!empty($configurationCustomField)) {
-      $fieldNameEdit = 'custom_' . $configurationCustomField['id'] . '_1';
-      $fieldNameCreate = 'custom_' . $configurationCustomField['id'] . '-1';
+      $fieldNameEdit = 'custom_' . $configurationCustomFieldId . '_1';
+      $fieldNameCreate = 'custom_' . $configurationCustomFieldId . '-1';
       $configurationValue = NULL;
       $fieldName = '';
 
@@ -76,6 +72,29 @@ function civicall_civicrm_validateForm($formName, &$fields, &$files, &$form, &$e
         }
       } else {
         CRM_Core_Session::setStatus(E::ts('Empty configuration'), E::ts('Call center configuration warning'), 'warning');
+      }
+    }
+  }
+}
+
+function civicall_civicrm_buildForm($formName, $form) {
+  if ($formName === CRM_Custom_Form_CustomDataByType::class) {
+    // The length of default value of any custom fields is 255 chars.
+    // Call config file has more than 255 chars.
+    // That's why it added by hook.
+    $configurationCustomFieldId = CivicallSettings::getCallConfigurationCustomFieldId();
+
+    if (!empty($configurationCustomFieldId)) {
+      $configElementName = 'custom_' . $configurationCustomFieldId . '_-1';
+
+      if ($form->elementExists($configElementName)) {
+        $configElement = $form->getElement($configElementName);
+        $callConfigPath = CRM_Civicall_ExtensionUtil::path('campaignConfigExample.json');
+
+        if (file_exists($callConfigPath)) {
+          $callConfig = file_get_contents($callConfigPath);
+          $configElement->setValue($callConfig);
+        }
       }
     }
   }

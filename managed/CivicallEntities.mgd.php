@@ -93,7 +93,7 @@ return [
         'label' => 'Configuration',
         'data_type' => 'Memo',
         'html_type' => 'TextArea',
-        'default_value' => NULL,
+        'default_value' => '{}',
         'is_required' => FALSE,
         'is_searchable' => FALSE,
         'is_search_range' => FALSE,

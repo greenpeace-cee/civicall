@@ -12,21 +12,28 @@
     }
   ],
   "scheduleOffsets": [
-    "1: +1 day",
-    "3: +7 days",
-    "0: +1 day",
-    "2: +2 days",
-    "4: +30 days"
+    {
+      "callNumber" : 0,
+      "dateModify" : "+1 day"
+    },
+    {
+      "callNumber" : 1,
+      "dateModify" : "+3 days"
+    },
+    {
+      "callNumber" : 2,
+      "dateModify" : "+4 days"
+    },
+    {
+      "callNumber" : 3,
+      "dateModify" : "+10 days"
+    }
   ],
   "finalResponseNames": [
-    "empty_response",
-    "response_option_value_name_1",
-    "response_option_value_name_2"
+    "empty_response"
   ],
   "preliminaryResponseNames": [
-    "empty_response",
-    "response_option_value_name_1",
-    "response_option_value_name_2"
+    "empty_response"
   ],
   "responseLimit": 3,
   "isShowTimer": true

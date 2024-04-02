@@ -27,15 +27,21 @@ class CallCenterConfiguration {
     $preparedConfiguration['pageLoader'] = $this->preparePageLoaderConfiguration($configurationJson);
 
     if (isset($configurationJson['finalResponseNames'])) {
-      $preparedConfiguration['finalResponseNames'] = $this->prepareResponseNames($configurationJson['finalResponseNames']);
+      $preparedConfiguration['finalResponse'] = $this->prepareResponseNames($configurationJson['finalResponseNames']);
     } else {
-      $preparedConfiguration['finalResponseNames'] = [];
+      $preparedConfiguration['finalResponse'] = [
+        'names' => ['*'],
+        'options' => CallResponses::getResponseOptions(),
+      ];
     }
 
     if (isset($configurationJson['preliminaryResponseNames'])) {
-      $preparedConfiguration['preliminaryResponseNames'] = $this->prepareResponseNames($configurationJson['preliminaryResponseNames']);
+      $preparedConfiguration['preliminaryResponse'] = $this->prepareResponseNames($configurationJson['preliminaryResponseNames']);
     } else {
-      $preparedConfiguration['preliminaryResponseNames'] = [];
+      $preparedConfiguration['preliminaryResponse'] = [
+        'names' => ['*'],
+        'options' => CallResponses::getResponseOptions(),
+      ];
     }
 
     if (!empty($configurationJson['scheduleOffsets'])) {
@@ -44,18 +50,29 @@ class CallCenterConfiguration {
       $preparedConfiguration['scheduleOffsets'] = [];
     }
 
-    $preparedConfiguration['isShowTimer'] = false;
     if (isset($configurationJson['isShowTimer']) && in_array($configurationJson['isShowTimer'], [1, "1", true, "true"], true)) {
       $preparedConfiguration['isShowTimer'] = true;
+    } elseif (isset($configurationJson['isShowTimer']) && in_array($configurationJson['isShowTimer'], [0, "0", false, "false"], true)) {
+      $preparedConfiguration['isShowTimer'] = false;
+    } else {
+      $this->setWarningMessage('"isShowTimer" filed has invalid value. This field uses default value.');
+      $preparedConfiguration['isShowTimer'] = false;
     }
 
-    $preparedConfiguration['responseLimit'] = CivicallSettings::CALL_RESPONSE_LIMIT_DEFAULT_VALUE;
     if (isset($configurationJson['responseLimit'])
       && is_numeric($configurationJson['responseLimit'])
       && $configurationJson['responseLimit'] >= 1
     ) {
       $preparedConfiguration['responseLimit'] = (int) $configurationJson['responseLimit'];
+    } else {
+      $this->setWarningMessage('"responseLimit" filed has invalid value. This field uses default value.');
+      $preparedConfiguration['responseLimit'] = CivicallSettings::CALL_RESPONSE_LIMIT_DEFAULT_VALUE;
     }
+
+//    echo '<pre>';
+//    var_dump($preparedConfiguration);
+//    echo '</pre>';
+//    exit();
 
     return $preparedConfiguration;
   }
@@ -95,69 +112,98 @@ class CallCenterConfiguration {
     return $preparedPageLoader;
   }
 
-  private function prepareScheduleOffsets($rawScheduleOffsets) {
+  private function prepareScheduleOffsets($rawScheduleOffsetItems) {
     $scheduleOffsets = [];
-    if (!is_array($rawScheduleOffsets)) {
-      $this->setWarningMessage('"scheduleOffsets" has to be array with offsets(string).');
+    $exampleMessage = '  Example: "scheduleOffsets": [{"callNumber" : 1,"dateModify" : "+3 days"}]';
+    $skipItemMessage = '  The "scheduleOffsets" item will be skipped!';
+
+    if (!is_array($rawScheduleOffsetItems)) {
+      $this->setWarningMessage('"scheduleOffsets" has to be array with offsets.' . $exampleMessage);
       return $scheduleOffsets;
     }
 
-    foreach ($rawScheduleOffsets as $rawScheduleOffset) {
-      if (is_string($rawScheduleOffset)) {
-        $parts = explode(':', $rawScheduleOffset);
+    foreach ($rawScheduleOffsetItems as $rawScheduleOffsetItem) {
+      $currentValueMessage = ' Current value: "' .  json_encode($rawScheduleOffsetItem) . '". ';
 
-        if (!isset($parts[0]) || !isset($parts[1])) {
-          $this->setWarningMessage('Not valid structure of date offset in "ScheduleOffset" item:' .  $rawScheduleOffset);
-          continue;
-        }
-
-        $callNumber = $parts[0];
-        $offset = $parts[1];
-
-        if (!is_numeric($callNumber)) {
-          $this->setWarningMessage('Not valid structure of date offset in "ScheduleOffset" item:' .  $rawScheduleOffset);
-          continue;
-        }
-
-        $dateTime = new DateTime();
-
-        try {
-          $dateTime->modify($offset);
-        } catch (Exception $e) {
-          $this->setWarningMessage('Not valid date offset in "ScheduleOffset" items:' .  $rawScheduleOffset . ', offset:' . $offset);
-          continue;
-        }
-        $scheduleOffsets[$callNumber] = [
-          'calculatedDate' => $dateTime->format('Y-m-d H:i:s'),
-          'offset' => $offset,
-          'callNumber' => $offset,
-        ];
+      if (!is_array($rawScheduleOffsetItem) || !isset($rawScheduleOffsetItem['callNumber']) || !isset($rawScheduleOffsetItem['dateModify'])) {
+        $this->setWarningMessage('Wrong structure of "scheduleOffsets" item.' . $skipItemMessage.  $currentValueMessage . $exampleMessage);
+        continue;
       }
+
+      $callNumber = $rawScheduleOffsetItem['callNumber'];
+      $dateModify = $rawScheduleOffsetItem['dateModify'];
+
+      if (!is_numeric($callNumber)) {
+        $this->setWarningMessage('"callNumber" value have to be integer.' . $skipItemMessage . $currentValueMessage . $exampleMessage);
+        continue;
+      }
+
+      if (!is_string($dateModify)) {
+        $this->setWarningMessage('"dateModify" value have to be string.' . $skipItemMessage . $currentValueMessage . $exampleMessage);
+        continue;
+      }
+
+      $dateTime = new DateTime();
+
+      try {
+        // TODO: try to hide warning message when not valid modify date, example value:  "+30 sadsadasd"
+        // TODO: In new version of PHP, modify have to throws an exception instead of a warning
+        $isValidDate = $dateTime->modify($dateModify);
+      } catch (Exception $e) {
+        $this->setWarningMessage('"dateModify" value is not valid. Cannot create date with this date!' . $skipItemMessage . $currentValueMessage . $exampleMessage);
+        continue;
+      }
+
+      if ($isValidDate === false) {
+        $this->setWarningMessage('"dateModify" is not valid.' . $skipItemMessage . $currentValueMessage . $exampleMessage);
+        continue;
+      }
+
+      $scheduleOffsets[$callNumber] = [
+        'calculatedDate' => $dateTime->format('Y-m-d H:i:s'),
+        'dateModify' => $dateModify,
+        'callNumber' => $callNumber,
+      ];
     }
 
     return $scheduleOffsets;
   }
 
   private function prepareResponseNames($rawResponseNames) {
+    $currentValueMessage = 'Current values: ' . json_encode($rawResponseNames);
     $responseNames = [];
     if (empty($rawResponseNames)) {
       return $responseNames;
     }
 
     if (!is_array($rawResponseNames)) {
-      $this->setWarningMessage('Response options has to be array of response option names!');
+      $this->setWarningMessage('Response options has to be array of response option names!' . $currentValueMessage);
       return $responseNames;
     }
 
+    $isThereInvalidOptions = false;
     foreach ($rawResponseNames as $name) {
       if (CallResponses::isValidResponseName($name)) {
         $responseNames[] = $name;
       } else {
+        $isThereInvalidOptions = true;
         $this->setWarningMessage('Not valid response option name: "' . $name . '".');
       }
     }
 
-    return $responseNames;
+    if ($isThereInvalidOptions && empty($responseNames)) {
+      $options = [];
+      $this->setWarningMessage("Response options doesn't have any valid option. " . $currentValueMessage);
+    } elseif(empty($responseNames)) {
+      $options = [];
+    } else {
+      $options = CallResponses::getResponseOptions($responseNames);
+    }
+
+    return [
+      'names' => $responseNames,
+      'options' => $options,
+    ];
   }
 
   public function isHasErrors() {
@@ -205,7 +251,11 @@ class CallCenterConfiguration {
    * * @return array
    */
   public function getAvailableResponseOptionValueNames() {
-    return $this->configuration['finalResponseNames'];
+    return $this->configuration['finalResponse']['names'];
+  }
+
+  public function getAvailableResponseOptions() {
+    return $this->configuration['finalResponse']['options'];
   }
 
   /**
@@ -214,7 +264,11 @@ class CallCenterConfiguration {
    * @return array
    */
   public function getPreliminaryResponseNames() {
-    return $this->configuration['preliminaryResponseNames'];
+    return $this->configuration['preliminaryResponse']['names'];
+  }
+
+  public function getPreliminaryResponseOptions() {
+    return $this->configuration['preliminaryResponse']['options'];
   }
 
   public function getAllConfiguration() {
@@ -222,3 +276,4 @@ class CallCenterConfiguration {
   }
 
 }
+While installing: Show warning message when Campaign component is disabled. Show Exception messages in popups. Stylize cancel button in popup. Change structure of ‘scheduleOffsets’  in campaign config. Validate ‘scheduleOffsets.dateModify’ in campaign config. Set default value to ‘call configuration’ field at campaign form. Added warning messages to ‘responseLimit’ and ‘isShowTimer’  in campaign config.If fields(preliminaryResponseNames or finalResponseNames) have only wrong values or empty array - it doesn’t allow any responses. If fields(preliminaryResponseNames or finalResponseNames) are not set -  it allows all responses.

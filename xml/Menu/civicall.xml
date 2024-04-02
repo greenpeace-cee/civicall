@@ -12,4 +12,10 @@
     <title>CivicallCallCenter</title>
     <access_arguments>access CiviCRM</access_arguments>
   </item>
+  <item>
+    <path>civicrm/civicall/error</path>
+    <page_callback>CRM_Civicall_Page_CivicallError</page_callback>
+    <title>CivicallError</title>
+    <access_arguments>access CiviCRM</access_arguments>
+  </item>
 </menu>
