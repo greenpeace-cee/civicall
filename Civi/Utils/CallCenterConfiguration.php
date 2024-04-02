@@ -276,4 +276,3 @@ class CallCenterConfiguration {
   }
 
 }
-While installing: Show warning message when Campaign component is disabled. Show Exception messages in popups. Stylize cancel button in popup. Change structure of ‘scheduleOffsets’  in campaign config. Validate ‘scheduleOffsets.dateModify’ in campaign config. Set default value to ‘call configuration’ field at campaign form. Added warning messages to ‘responseLimit’ and ‘isShowTimer’  in campaign config.If fields(preliminaryResponseNames or finalResponseNames) have only wrong values or empty array - it doesn’t allow any responses. If fields(preliminaryResponseNames or finalResponseNames) are not set -  it allows all responses.
