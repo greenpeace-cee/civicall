@@ -69,11 +69,6 @@ class CallCenterConfiguration {
       $preparedConfiguration['responseLimit'] = CivicallSettings::CALL_RESPONSE_LIMIT_DEFAULT_VALUE;
     }
 
-//    echo '<pre>';
-//    var_dump($preparedConfiguration);
-//    echo '</pre>';
-//    exit();
-
     return $preparedConfiguration;
   }
 

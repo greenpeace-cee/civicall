@@ -157,10 +157,12 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Civicall_Form_CivicallFor
       ->addValue('call_response_option_value_id', $values['preliminary_call_response'])
       ->execute();
 
+    $callLogsCount = CivicallUtils::getActivityCallLogsCount($this->activity['id']);
+
     Activity::update()
       ->addValue('details', $values['notes'])
       ->addWhere('id', '=', $this->activity['id'])
-      ->addValue('civicall_call_details.civicall_response_counter', $this->callLogsCount)
+      ->addValue('civicall_call_details.civicall_response_counter', $callLogsCount)
       ->execute();
 
     parent::postProcess();
