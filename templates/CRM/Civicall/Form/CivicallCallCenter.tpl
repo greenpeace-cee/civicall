@@ -67,9 +67,22 @@
     </div>
   </div>
 
-  <div class="call-center__dynamic-block-wrap">
-    <div id="callCenterDynamicContent"></div>
-  </div>
+  {if (!empty($pageLoaderConfiguration))}
+    <div class="call-center__dynamic-block-wrap">
+      {foreach from=$pageLoaderConfiguration item=loader}
+        <div class="call-center__dynamic-block-item">
+          <div class="civicall__accordion crm-accordion-wrapper {if !$loader.isCollapsed} collapsed {/if}">
+            <div class="crm-accordion-header crm-master-accordion-header">{$loader.title}</div>
+            <div class="crm-accordion-body">
+              <div class="call-center__dynamic-block">
+                {$loader.afformModuleHtml}
+              </div>
+            </div>
+          </div>
+        </div>
+      {/foreach}
+    </div>
+  {/if}
 
   <div class="call-center__call-results-block-wrap">
     <div class="civicall__accordion crm-accordion-wrapper">
@@ -178,48 +191,9 @@
 <script>
   (function (CRM, $) {
     $(document).ready(function() {
-      let pageLoaderConfiguration = {/literal}{$pageLoaderConfiguration|@json_encode nofilter}{literal};
       let isShowTimer = {/literal}{if $isShowTimer}true{else}false{/if}{literal};
 
       initTimer(isShowTimer);
-      initHandlerDynamicContent(pageLoaderConfiguration);
-
-      function initHandlerDynamicContent(pageLoaderConfiguration) {
-        const dynamicContentElement = $('#callCenterDynamicContent');
-        if (dynamicContentElement.length === 0) {
-          return;
-        }
-
-        pageLoaderConfiguration.forEach((pageConfig, index) => {
-          appendDynamicContent(dynamicContentElement, pageConfig, index)
-        });
-      }
-
-      function appendDynamicContent(dynamicContentElement, pageConfig, pageConfigId) {
-        let pageConfigElementId = 'pageConfigId_' + pageConfigId;
-        let classes = '';
-        if (pageConfig.isCollapsed) {
-          classes += 'collapsed';
-        }
-
-        dynamicContentElement.append("" +
-          '<div class="call-center__dynamic-block-item">' +
-            '<div class="civicall__accordion crm-accordion-wrapper ' + classes + '">' +
-              '<div class="crm-accordion-header crm-master-accordion-header">' + pageConfig.title + '</div>' +
-                '<div class="crm-accordion-body">' +
-                  '<div class="call-center__dynamic-block">' +
-                    '<div id="' + pageConfigElementId + '">' +
-                      'In develop' +
-                    '</div>' +
-                  '</div>' +
-                '</div>' +
-              '</div>' +
-            '</div>' +
-          '</div>');
-
-        let pageContentElement = dynamicContentElement.find('#' + pageConfigElementId);
-        // TODO: search kit forms
-      }
 
       function initTimer(isShowTimer) {
         if (!isShowTimer) {

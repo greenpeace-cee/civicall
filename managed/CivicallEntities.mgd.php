@@ -1,10 +1,9 @@
 <?php
 
-$outgoingCallOptionValueName = 'Outgoing Call';
-$outgoingCallOptionValueValue = 1000;
-
 // Get value of "Outgoing Call" OptionValue if it already in civi
 // It needs to prevent overriding value(OptionValue.value) by mgd file.
+$outgoingCallOptionValueName = 'Outgoing Call';
+$outgoingCallOptionValueValue = 1000;
 $optionValue = \Civi\Api4\OptionValue::get()
   ->addWhere('option_group_id:name', '=', 'activity_type')
   ->addWhere('name', '=', $outgoingCallOptionValueName)
@@ -12,6 +11,19 @@ $optionValue = \Civi\Api4\OptionValue::get()
   ->first();
 if (!empty($optionValue['value'])) {
   $outgoingCallOptionValueValue = $optionValue['value'];
+}
+
+// Get value of "Response" OptionValue if it already in civi
+// It needs to prevent overriding value(OptionValue.value) by mgd file.
+$responseOptionValueName = 'Response';
+$responseOptionValueValue = 1100;
+$optionValue = \Civi\Api4\OptionValue::get()
+  ->addWhere('option_group_id:name', '=', 'activity_type')
+  ->addWhere('name', '=', $responseOptionValueName)
+  ->execute()
+  ->first();
+if (!empty($optionValue['value'])) {
+  $responseOptionValueValue = $optionValue['value'];
 }
 
 return [
@@ -27,6 +39,38 @@ return [
         'label' => 'Outgoing Call',
         'name' => $outgoingCallOptionValueName,
         'value' => $outgoingCallOptionValueValue,
+        'grouping' => NULL,
+        'filter' => 0,
+        'is_default' => FALSE,
+        'weight' => 100,
+        'description' => '',
+        'is_optgroup' => FALSE,
+        'is_reserved' => FALSE,
+        'is_active' => TRUE,
+        'component_id' => NULL,
+        'domain_id' => NULL,
+        'visibility_id' => NULL,
+        'icon' => NULL,
+        'color' => NULL,
+      ],
+      'match' => [
+        'option_group_id',
+        'name',
+      ],
+    ],
+  ],
+  [
+    'name' => 'OptionValue_Outgoing_' . $responseOptionValueName,
+    'entity' => 'OptionValue',
+    'cleanup' => 'never',
+    'update' => 'always',
+    'params' => [
+      'version' => 4,
+      'values' => [
+        'option_group_id.name' => 'activity_type',
+        'label' => 'Response',
+        'name' => $responseOptionValueName,
+        'value' => $responseOptionValueValue,
         'grouping' => NULL,
         'filter' => 0,
         'is_default' => FALSE,

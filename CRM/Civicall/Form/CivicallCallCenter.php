@@ -3,15 +3,15 @@
 use Civi\Api4\Activity;
 use Civi\Api4\CallLogs;
 use Civi\Api4\OptionValue;
-use Civi\Utils\CallCenterConfiguration;
-use Civi\Utils\CallResponses;
-use Civi\Utils\CivicallSettings;
-use Civi\Utils\CivicallUtils;
+use Civi\Civicall\Utils\CallCenterConfiguration;
+use Civi\Civicall\Utils\CivicallSettings;
+use Civi\Civicall\Utils\CivicallUtils;
 use CRM_Civicall_ExtensionUtil as E;
 
 class CRM_Civicall_Form_CivicallCallCenter extends CRM_Civicall_Form_CivicallForm {
 
   public $activity = [];
+  public $targetContact = [];
   public $callLogsCount = 0;
   public $isFormInPopup = false;
 
@@ -37,8 +37,8 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Civicall_Form_CivicallFor
       $this->showError('CallCenter not enabled for target campaign');
     }
 
-    $targetContact = CivicallUtils::getCallCenterTargetContact($activityId);
-    if (empty($targetContact)) {
+    $this->targetContact = CivicallUtils::getCallCenterTargetContact($activityId);
+    if (empty($this->targetContact)) {
       $this->showError('Cannot find contact.');
     }
 
@@ -54,17 +54,24 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Civicall_Form_CivicallFor
 
     $this->callCenterConfiguration = new CallCenterConfiguration($this->activity['campaignConfiguration']);
     if ($this->callCenterConfiguration->isHasErrors()) {
-      throw new Exception('CallCenter Configuration error:' . $this->callCenterConfiguration->getErrors());
+      $this->showError('CallCenter Configuration error:' . $this->callCenterConfiguration->getErrors());
     }
 
     $this->callLogsCount = CivicallUtils::getActivityCallLogsCount($this->activity['id']);
+
+    $this->callCenterConfiguration->loadAfformModules(
+      ['contact_id' => $this->targetContact['id']],
+      [
+        'afsearchVenueAttachments' => ['contact_id' => $this->targetContact['id']],
+      ]
+    );
 
     $this->assign('responseLimitMessage', CivicallSettings::getResponseLimitMessage($this->callCenterConfiguration->getResponseLimit(), $this->callLogsCount));
     $this->assign('pageLoaderConfiguration', $this->callCenterConfiguration->getPageLoader());
     $this->assign('isShowTimer', $this->callCenterConfiguration->getIsShowTimer());
     $this->assign('callLogs', CivicallUtils::getCallCenterLogs($activityId));
     $this->assign('activity', $this->activity);
-    $this->assign('targetContact', $targetContact);
+    $this->assign('targetContact', $this->targetContact);
     $this->assign('targetCampaign', $targetCampaign);
     $this->assign('rescheduleButtonName', self::getRescheduleButtonName());
     $this->assign('closeAndSaveButtonName', self::getCloseAndSaveButtonName());
@@ -136,6 +143,18 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Civicall_Form_CivicallFor
         ->addValue('civicall_call_details.final_response_date', $values['response_call_date'])
         ->addValue('civicall_call_details.civicall_call_final_response', $finalCallResponseValue)
         ->execute();
+
+      $responseActivity = Activity::create()
+        ->addValue('activity_type_id:name', CivicallSettings::RESPONSE_CALL_ACTIVITY_TYPE)
+        ->addValue('activity_type_id:description', 'Response Outgoing Call')
+        ->addValue('subject', 'Response Outgoing Call')
+        ->addValue('activity_date_time', $values['response_call_date'])
+        ->addValue('source_contact_id', CRM_Core_Session::getLoggedInContactID())
+        ->addValue('target_contact_id', $this->targetContact['id'])
+        ->execute()
+        ->first();
+
+      CivicallUtils::linkActivity($responseActivity['id'], $this->activity['id']);
 
       CRM_Core_Session::setStatus(E::ts("Closed call and saved!"), E::ts('Success'), 'success');
     } elseif ($isRescheduleAction) {

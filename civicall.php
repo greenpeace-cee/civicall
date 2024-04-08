@@ -2,7 +2,8 @@
 
 require_once 'civicall.civix.php';
 
-use Civi\Utils\CivicallSettings;
+use Civi\Civicall\Utils\CallCenterConfiguration;
+use Civi\Civicall\Utils\CivicallSettings;
 use CRM_Civicall_ExtensionUtil as E;
 
 /**
@@ -40,28 +41,20 @@ function civicall_civicrm_validateForm($formName, &$fields, &$files, &$form, &$e
   if ($formName === CRM_Campaign_Form_Campaign::class) {
     $configurationCustomFieldId = CivicallSettings::getCallConfigurationCustomFieldId();
 
-    if (!empty($configurationCustomField)) {
-      $fieldNameEdit = 'custom_' . $configurationCustomFieldId . '_1';
-      $fieldNameCreate = 'custom_' . $configurationCustomFieldId . '-1';
-      $configurationValue = NULL;
-      $fieldName = '';
-
-      if (isset($fields[$fieldNameEdit])) {
-        if (!empty($fields[$fieldNameEdit])) {
-          $configurationValue = $fields[$fieldNameEdit];
-        }
-        $fieldName = $fieldNameEdit;
+    if (!empty($configurationCustomFieldId)) {
+      if ($form->getAction() === NULL) {// it is ADD action
+        $fieldName = 'custom_' . $configurationCustomFieldId . '_-1';
+      } elseif ($form->getAction() === CRM_Core_Action::UPDATE) {
+        $fieldName = 'custom_' . $configurationCustomFieldId . '_' . CRM_Core_Action::UPDATE;
       }
 
-      if (isset($fields[$fieldNameCreate])) {
-        if (!empty($fields[$fieldNameCreate])) {
-          $configurationValue = $fields[$fieldNameCreate];
-        }
-        $fieldName = $fieldNameCreate;
+      $configurationValue = NULL;
+      if (!empty($fields[$fieldName])) {
+        $configurationValue = $fields[$fieldName];
       }
 
       if (!is_null($configurationValue)) {
-        $callCenterConfiguration = new \Civi\Utils\CallCenterConfiguration($configurationValue);
+        $callCenterConfiguration = new CallCenterConfiguration($configurationValue);
 
         if ($callCenterConfiguration->isHasErrors()) {
           $errors[$fieldName] = $callCenterConfiguration->getErrors();
@@ -89,11 +82,13 @@ function civicall_civicrm_buildForm($formName, $form) {
 
       if ($form->elementExists($configElementName)) {
         $configElement = $form->getElement($configElementName);
-        $callConfigPath = CRM_Civicall_ExtensionUtil::path('campaignConfigExample.json');
+        if ($configElement->getValue() === CivicallSettings::CALL_CONFIG_DEFAULT_VALUE) {
+          $callConfigPath = CRM_Civicall_ExtensionUtil::path('campaignConfigExample.json');
 
-        if (file_exists($callConfigPath)) {
-          $callConfig = file_get_contents($callConfigPath);
-          $configElement->setValue($callConfig);
+          if (file_exists($callConfigPath)) {
+            $callConfig = file_get_contents($callConfigPath);
+            $configElement->setValue($callConfig);
+          }
         }
       }
     }

@@ -1,14 +1,14 @@
 {
   "pageLoader": [
     {
-      "afformModuleName" : "testModule",
+      "afformModuleName" : "testAfformModuleName",
       "isCollapsed" : "false",
-      "title": "Dynamic content 1"
+      "title": "Example dynamic content"
     },
     {
-      "afformModuleName" : "superTestModule",
-      "isCollapsed" : "false",
-      "title": "Dynamic content 2"
+      "afformModuleName" : "superTestAfformModuleName",
+      "isCollapsed" : "true",
+      "title": "Another example dynamic content"
     }
   ],
   "scheduleOffsets": [

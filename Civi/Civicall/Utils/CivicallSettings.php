@@ -1,11 +1,13 @@
 <?php
 
-namespace Civi\Utils;
+namespace Civi\Civicall\Utils;
 
 class CivicallSettings {
 
   const OUTGOING_CALL_ACTIVITY_TYPE = 'Outgoing Call';
+  const RESPONSE_CALL_ACTIVITY_TYPE = 'Response';
   const CALL_RESPONSE_LIMIT_DEFAULT_VALUE = 3;
+  const CALL_CONFIG_DEFAULT_VALUE = "{}";
 
   public static function getResponseLimitMessage($responseLimitConfiguration, $callLogsCount) {
     if ($callLogsCount === $responseLimitConfiguration) {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Civi\Utils;
+namespace Civi\Civicall\Utils;
 
 use Civi\Api4\OptionValue;
 

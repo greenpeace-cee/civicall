@@ -1,6 +1,6 @@
 <?php
 
-use Civi\Utils\CivicallUtils;
+use Civi\Civicall\Utils\CivicallUtils;
 use CRM_Civicall_ExtensionUtil as E;
 
 class CRM_Civicall_Form_CivicallDashboard extends CRM_Civicall_Form_CivicallForm {

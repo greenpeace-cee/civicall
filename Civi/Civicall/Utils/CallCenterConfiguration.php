@@ -1,6 +1,6 @@
 <?php
 
-namespace Civi\Utils;
+namespace Civi\Civicall\Utils;
 
 use DateTime;
 use Dompdf\Exception;
@@ -92,19 +92,49 @@ class CallCenterConfiguration {
         $this->setError('Wrong structure of pageLoader config. "afformModuleName" field is required for pageLoader item.');
       }
 
-      $isCollapsed = true;
-      if (isset($pageConfig['isCollapsed'])) {
-        $isCollapsed = $pageConfig['isCollapsed'];
+      $isCollapsed = false;
+      if (isset($pageConfig['isCollapsed']) && in_array($pageConfig['isCollapsed'], [1, "1", true, "true"], true)) {
+        $isCollapsed = true;
+      } elseif (isset($pageConfig['isCollapsed']) && in_array($pageConfig['isCollapsed'], [0, "0", false, "false"], true)) {
+        $isCollapsed = false;
       }
 
       $preparedPageLoader[] = [
         'title' => $pageConfig['title'],
         'afformModuleName' => $pageConfig['afformModuleName'],
+        'afformModuleParams' => [],// TODO: Do we need set afformModuleParams by configuration json?
         'isCollapsed' => $isCollapsed,
+        'afformModuleHtml' => "AfformModule " . $pageConfig['afformModuleName'] . " is doesn't load!",
       ];
     }
 
     return $preparedPageLoader;
+  }
+
+  /**
+   * Loads afform modules scripts and render template for it
+   *
+   * @param $afformModuleParams
+   * @return void
+   */
+  public function loadAfformModules($defaultAfformModuleParams, $afformModuleParams = []) {
+    foreach ($this->configuration['pageLoader'] as $key => $loader) {
+      if (!empty($afformModuleParams[$loader['afformModuleName']])) {
+        $afformModuleParams = $afformModuleParams[$loader['afformModuleName']];
+      } elseif (!empty($loader['afformModuleParams'])) {
+        $afformModuleParams = $loader['afformModuleParams'];
+      } elseif (!empty($defaultAfformModuleParams)) {
+        $afformModuleParams = $defaultAfformModuleParams;
+      } else {
+        $afformModuleParams = [];
+      }
+
+      $afformLoader = new AfformLoader($loader['afformModuleName'], $afformModuleParams);
+      $afformTemplateHtml = $afformLoader->getTemplate();
+      $afformLoader->loadAngularjsModule();
+
+      $this->configuration['pageLoader'][$key]['afformModuleHtml'] = $afformTemplateHtml;
+    }
   }
 
   private function prepareScheduleOffsets($rawScheduleOffsetItems) {

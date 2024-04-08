@@ -1,6 +1,6 @@
 <?php
 
-namespace Civi\Utils;
+namespace Civi\Civicall\Utils;
 
 use Civi\Api4\Activity;
 use CRM_Core_PseudoConstant;
@@ -229,6 +229,31 @@ class CivicallUtils {
       ->addWhere('activity_id', '=', $activityId)
       ->execute()
       ->count();
+  }
+
+  public static function linkActivity($childActivityId, $parentActivityId) {
+    $isActivityHasHierarchyCustomField = false;
+    $customField = \Civi\Api4\CustomField::get()
+      ->addWhere('custom_group_id:name', '=', 'activity_hierarchy')
+      ->addWhere('name', '=', 'parent_activity_id')
+      ->addWhere('custom_group_id.extends', '=', 'Activity')
+      ->execute()
+      ->first();
+
+    if (!empty($customField)) {
+      $isActivityHasHierarchyCustomField = true;
+    }
+
+    $activity = Activity::update();
+    $activity->addWhere('id', '=', $childActivityId);
+
+    if ($isActivityHasHierarchyCustomField) {
+      $activity->addValue('activity_hierarchy.parent_activity_id', $parentActivityId);
+    } else {
+      $activity->addValue('parent_id', $parentActivityId);
+    }
+
+    $activity->execute();
   }
 
 }
