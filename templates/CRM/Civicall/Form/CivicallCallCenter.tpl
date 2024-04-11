@@ -199,14 +199,6 @@
               <div class="call-center__action-wrap">
                 <div class="call-center__sub-title">Update Call Response</div>
                 <div class="call-center__action-row">
-                  <div class="call-center__action-row-item">
-                    <div class="call-center__action-row-item-title">
-                      {$form.new_response_call_date.label}
-                    </div>
-                    <div class="call-center__action-row-item-content">
-                      {$form.new_response_call_date.html}
-                    </div>
-                  </div>
 
                   <div class="call-center__action-row-item">
                     <div class="call-center__action-row-item-title">

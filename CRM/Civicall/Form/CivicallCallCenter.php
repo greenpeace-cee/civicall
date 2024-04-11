@@ -97,7 +97,6 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Core_Form {
     $this->add('hidden', 'activity_id', $this->activity['id']);
     $this->add('datepicker', 'reopen_scheduled_call_date', 'Reopen Schedule Date', ['class' => 'civicall__input civicall--datepicker'], FALSE, ['minDate' => date('Y-m-d')]);
     $this->add('select', 'new_final_call_response', 'New final response', $finalResponseOptions, FALSE, ['class' => 'civicall__input civicall--width-150']);
-    $this->add('datepicker', 'new_response_call_date', 'New response Date', ['class' => 'civicall__input civicall--datepicker'], FALSE, ['minDate' => date('Y-m-d')]);
 
     $this->addButtons([
       [
@@ -155,21 +154,16 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Core_Form {
   }
 
   private function runUpdateCallResponseAction($values) {
-    $startCallDate = CivicallUtils::convertTimestampToDateTimeObject(($values['start_call_time_timestamp'] ?? null));
-    CivicallUtils::removeLastCallLogs($values['activity_id']);
+    $callLogId = CivicallUtils::getLastCallLogId($values['activity_id']);
 
-    CallLogs::create()
-      ->addValue('activity_id', $values['activity_id'])
-      ->addValue('call_start_date', $startCallDate->format('Y-m-d H:i:s'))
-      ->addValue('call_end_date', (new DateTime)->format('Y-m-d H:i:s'))
-      ->addValue('created_by_contact_id', CRM_Core_Session::getLoggedInContactID())
+    CallLogs::update()
+      ->addWhere('id', '=', $callLogId)
       ->addValue('call_response_option_value_id', $values['new_final_call_response'])
       ->execute();
 
     Activity::update()
       ->addWhere('id', '=', $this->activity['id'])
       ->addValue('status_id:name', 'Scheduled')
-      ->addValue('civicall_call_details.final_response_date', $values['new_response_call_date'])
       ->addValue('civicall_call_details.civicall_call_final_response', CallResponses::getResponseValueById($values['new_final_call_response']))
       ->addValue('details', $values['notes'])
       ->execute();
@@ -269,9 +263,6 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Core_Form {
     }
 
     if (CallCenterActions::isAction($values, CallCenterActions::UPDATE_CALL_RESPONSE)) {
-      if (empty($values['new_response_call_date'])) {
-        $errors['new_response_call_date'] = "New response Date is required field!";
-      }
       if (empty($values['new_final_call_response'])) {
         $errors['new_final_call_response'] = "New final response response is required field!";
       }
@@ -286,7 +277,6 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Core_Form {
     $defaults['notes'] = $this->activity['details'];
     $defaults['response_call_date'] = (new DateTime())->format('Y-m-d H:i:s');
     $defaults['reopen_scheduled_call_date'] = (new DateTime())->format('Y-m-d H:i:s');
-    $defaults['new_response_call_date'] = (new DateTime())->format('Y-m-d H:i:s');
 
     $scheduleOffsets = $this->callCenterConfiguration->getScheduleOffsets();
     if (!empty($scheduleOffsets[$this->callLogsCount]['calculatedDate'])) {

@@ -265,9 +265,9 @@ class CivicallUtils {
     return $responseActivityIds;
   }
 
-  public static function removeLastCallLogs($activityId) {
+  public static function getLastCallLogId($activityId) {
     if (empty($activityId)) {
-      return;
+      return null;
     }
 
     $callLog = CallLogs::get()
@@ -277,11 +277,12 @@ class CivicallUtils {
       ->setLimit(1)
       ->execute()
       ->first();
-    if (empty($callLog['id'])) {
-      return;
+
+    if (!empty($callLog['id'])) {
+      return $callLog['id'];
     }
 
-    CallLogs::delete()->addWhere('id', '=', $callLog['id'])->execute();
+    return null;
   }
 
   public static function isOutgoingCallActivity($activityId) {
