@@ -26,6 +26,11 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Core_Form {
   public function preProcess() {
     CRM_Utils_System::setTitle(E::ts('Call Center'));
 
+    $isJsonSnippet = CRM_Utils_Request::retrieve('snippet', 'String', $this) === 'json';
+    if ($isJsonSnippet) {
+      $this->isFormInPopup = true;
+    }
+
     $activityId = CRM_Utils_Request::retrieve('activity_id', 'Integer', $this);
     if (empty($activityId)) {
       $this->showError('Cannot find activity id.');
@@ -48,11 +53,6 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Core_Form {
     $targetCampaign = CivicallUtils::getCallCenterTargetCampaign($activityId);
     if (empty($targetCampaign)) {
       $this->showError('Cannot find campaign.');
-    }
-
-    $isJsonSnippet = CRM_Utils_Request::retrieve('snippet', 'String', $this) === 'json';
-    if ($isJsonSnippet) {
-      $this->isFormInPopup = true;
     }
 
     $this->callCenterConfiguration = new CallCenterConfiguration($this->activity['campaignConfiguration']);
