@@ -284,5 +284,24 @@ class CivicallUtils {
     CallLogs::delete()->addWhere('id', '=', $callLog['id'])->execute();
   }
 
+  public static function isOutgoingCallActivity($activityId) {
+    if (empty($activityId)) {
+      return false;
+    }
+
+    $activity = Activity::get()
+      ->addSelect('id')
+      ->addWhere('activity_type_id:name', '=', CivicallSettings::OUTGOING_CALL_ACTIVITY_TYPE)
+      ->addWhere('id', '=', $activityId)
+      ->execute()
+      ->first();
+
+    if (!empty($activity['id'])) {
+      return true;
+    }
+
+    return false;
+  }
+
 }
 

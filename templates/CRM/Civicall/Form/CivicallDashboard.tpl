@@ -23,3 +23,4 @@
     {/foreach}
   </div>
 </div>
+<script src="{$callCenterJsUrl}"></script>

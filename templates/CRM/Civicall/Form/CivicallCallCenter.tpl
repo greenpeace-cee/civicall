@@ -245,6 +245,7 @@
   </div>
 </div>
 
+<script src="{$callCenterJsUrl}"></script>
 {*
   This scripts have to be included inliene in template.
   If you include the script at form controller, it runs only onnce while opening first time popup with this form.

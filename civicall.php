@@ -4,6 +4,7 @@ require_once 'civicall.civix.php';
 
 use Civi\Civicall\Utils\CallCenterConfiguration;
 use Civi\Civicall\Utils\CivicallSettings;
+use Civi\Civicall\Utils\CivicallUtils;
 use CRM_Civicall_ExtensionUtil as E;
 
 /**
@@ -92,5 +93,16 @@ function civicall_civicrm_buildForm($formName, $form) {
         }
       }
     }
+  }
+}
+
+function civicall_civicrm_links(string $op, ?string $objectName, $objectID, array &$links, ?int &$mask, array &$values) {
+  if ($objectName === 'Activity' && $op === 'activity.tab.row' && CivicallUtils::isOutgoingCallActivity($objectID)) {
+    $links[] = [
+      'name' => 'Call center',
+      'title' => 'Call center',
+      'qs' => 'reset=1&activity_id=%%id%%',
+      'url' => 'civicrm/civicall/call-center',
+    ];
   }
 }

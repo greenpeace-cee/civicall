@@ -10,7 +10,7 @@ use Civi\Civicall\Utils\CivicallSettings;
 use Civi\Civicall\Utils\CivicallUtils;
 use CRM_Civicall_ExtensionUtil as E;
 
-class CRM_Civicall_Form_CivicallCallCenter extends CRM_Civicall_Form_CivicallForm {
+class CRM_Civicall_Form_CivicallCallCenter extends CRM_Core_Form {
 
   public $activity = [];
   public $targetContact = [];
@@ -73,6 +73,7 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Civicall_Form_CivicallFor
     $this->assign('targetCampaign', $targetCampaign);
     $this->assign('isFormInPopup', $this->isFormInPopup);
     $this->assign('isCallAlreadyClosed', $this->isCallAlreadyClosed);
+    $this->assign('callCenterJsUrl', CRM_Civicall_ExtensionUtil::url('js/civicall.js'));
 
     $this->assign('rescheduleCallButtonName', CallCenterActions::getButtonName(CallCenterActions::RESCHEDULE_CALL));
     $this->assign('closeCallButtonName', CallCenterActions::getButtonName(CallCenterActions::CLOSE_CALL));

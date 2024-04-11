@@ -3,7 +3,7 @@
 use Civi\Civicall\Utils\CivicallUtils;
 use CRM_Civicall_ExtensionUtil as E;
 
-class CRM_Civicall_Form_CivicallDashboard extends CRM_Civicall_Form_CivicallForm {
+class CRM_Civicall_Form_CivicallDashboard extends CRM_Core_Form {
 
   public function buildQuickForm(): void {
     $params = [];
@@ -18,6 +18,7 @@ class CRM_Civicall_Form_CivicallDashboard extends CRM_Civicall_Form_CivicallForm
     ]);
 
     $this->assign('civicallActivities', $civicallActivities);
+    $this->assign('callCenterJsUrl', CRM_Civicall_ExtensionUtil::url('js/civicall.js'));
 
     parent::buildQuickForm();
   }
