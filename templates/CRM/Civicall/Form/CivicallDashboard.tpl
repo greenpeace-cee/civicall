@@ -13,7 +13,10 @@
             <a class="crm-popup" href="{$activity.callCenterLink}">Call center link</a>
           </div>
           <div>
-            <a class="crm-popup" href="{$activity.editActivityLink}">Edit activity link</a>
+            <a class="crm-popup" href="{$activity.editActivityLink}" target="_blank">Edit activity link</a>
+          </div>
+          <div>
+            <a class="crm-popup" href="{$activity.editCampaignLink}" target="_blank">Edit campaign link</a>
           </div>
         </li>
       </ul>

@@ -10,6 +10,23 @@ class CallResponses {
 
   private static $responses = NULL;
 
+  /**
+   * @param $responseOptionValueId
+   * @return string
+   */
+  public static function getResponseValueById($responseOptionValueId) {
+    CallResponses::setResponses();
+
+    $optionValueValue = NULL;
+    foreach (CallResponses::$responses as $responses) {
+      if ($responses['id'] == $responseOptionValueId) {
+        $optionValueValue = $responses['value'];
+      }
+    }
+
+    return $optionValueValue;
+  }
+
   public static function isValidResponseName($responseName) {
     CallResponses::setResponses();
 
@@ -43,7 +60,7 @@ class CallResponses {
     }
 
     $optionValues = OptionValue::get()
-      ->addSelect('id', 'label', 'name')
+      ->addSelect('id', 'label', 'name', 'value')
       ->addWhere('option_group_id:name', '=', CallResponses::RESPONSES_OPTION_GROUP_NAME)
       ->execute();
 
@@ -54,6 +71,7 @@ class CallResponses {
         'id' => $optionValue['id'],
         'label' => $optionValue['label'],
         'name' => $optionValue['name'],
+        'value' => $optionValue['value'],
       ];
     }
   }

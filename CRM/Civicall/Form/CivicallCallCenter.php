@@ -2,8 +2,10 @@
 
 use Civi\Api4\Activity;
 use Civi\Api4\CallLogs;
-use Civi\Api4\OptionValue;
+use Civi\Civicall\Utils\CallCenterActions;
 use Civi\Civicall\Utils\CallCenterConfiguration;
+use Civi\Civicall\Utils\CallLogsUtils;
+use Civi\Civicall\Utils\CallResponses;
 use Civi\Civicall\Utils\CivicallSettings;
 use Civi\Civicall\Utils\CivicallUtils;
 use CRM_Civicall_ExtensionUtil as E;
@@ -14,6 +16,7 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Civicall_Form_CivicallFor
   public $targetContact = [];
   public $callLogsCount = 0;
   public $isFormInPopup = false;
+  public $isCallAlreadyClosed = false;
 
   /**
    * @var CallCenterConfiguration
@@ -57,26 +60,26 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Civicall_Form_CivicallFor
       $this->showError('CallCenter Configuration error:' . $this->callCenterConfiguration->getErrors());
     }
 
-    $this->callLogsCount = CivicallUtils::getActivityCallLogsCount($this->activity['id']);
-
-    $this->callCenterConfiguration->loadAfformModules(
-      ['contact_id' => $this->targetContact['id']],
-      [
-        'afsearchVenueAttachments' => ['contact_id' => $this->targetContact['id']],
-      ]
-    );
+    $this->isCallAlreadyClosed = CivicallUtils::isCallAlreadyClosed($this->activity['id']);
+    $this->callLogsCount = CallLogsUtils::getActivityCallLogsCount($this->activity['id']);
+    $this->callCenterConfiguration->loadAfformModules(['contact_id' => $this->targetContact['id']]);
 
     $this->assign('responseLimitMessage', CivicallSettings::getResponseLimitMessage($this->callCenterConfiguration->getResponseLimit(), $this->callLogsCount));
     $this->assign('pageLoaderConfiguration', $this->callCenterConfiguration->getPageLoader());
     $this->assign('isShowTimer', $this->callCenterConfiguration->getIsShowTimer());
-    $this->assign('callLogs', CivicallUtils::getCallCenterLogs($activityId));
+    $this->assign('callLogs', CallLogsUtils::getCallCenterLogs($activityId));
     $this->assign('activity', $this->activity);
     $this->assign('targetContact', $this->targetContact);
     $this->assign('targetCampaign', $targetCampaign);
-    $this->assign('rescheduleButtonName', self::getRescheduleButtonName());
-    $this->assign('closeAndSaveButtonName', self::getCloseAndSaveButtonName());
-    $this->assign('closeAndWithoutSaveButtonName', self::getCloseAndWithoutSaveButtonName());
     $this->assign('isFormInPopup', $this->isFormInPopup);
+    $this->assign('isCallAlreadyClosed', $this->isCallAlreadyClosed);
+
+    $this->assign('rescheduleCallButtonName', CallCenterActions::getButtonName(CallCenterActions::RESCHEDULE_CALL));
+    $this->assign('closeCallButtonName', CallCenterActions::getButtonName(CallCenterActions::CLOSE_CALL));
+    $this->assign('reopenCallButtonName', CallCenterActions::getButtonName(CallCenterActions::REOPEN_CALL));
+    $this->assign('updateCallResponseButtonName', CallCenterActions::getButtonName(CallCenterActions::UPDATE_CALL_RESPONSE));
+    $this->assign('cancelButtonName', '_qf_CivicallCallCenter_cancel');
+
     parent::preProcess();
   }
 
@@ -91,6 +94,9 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Civicall_Form_CivicallFor
     $this->add('select', 'final_call_response', 'Final response', $finalResponseOptions, FALSE, ['class' => 'civicall__input civicall--width-150']);
     $this->add('hidden', 'start_call_time_timestamp', (new DateTime())->getTimestamp());
     $this->add('hidden', 'activity_id', $this->activity['id']);
+    $this->add('datepicker', 'reopen_scheduled_call_date', 'Reopen Schedule Date', ['class' => 'civicall__input civicall--datepicker'], FALSE, ['minDate' => date('Y-m-d')]);
+    $this->add('select', 'new_final_call_response', 'New final response', $finalResponseOptions, FALSE, ['class' => 'civicall__input civicall--width-150']);
+    $this->add('datepicker', 'new_response_call_date', 'New response Date', ['class' => 'civicall__input civicall--datepicker'], FALSE, ['minDate' => date('Y-m-d')]);
 
     $this->addButtons([
       [
@@ -100,12 +106,7 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Civicall_Form_CivicallFor
       ],
       [
         'type' => 'submit',
-        'name' => E::ts('Close call and save'),
-        'isDefault' => false,
-      ],
-      [
-        'type' => 'next',
-        'name' => E::ts('Reschedule call'),
+        'name' => E::ts('Civicall Call Center Actions'),
         'isDefault' => false,
       ],
     ]);
@@ -115,58 +116,66 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Civicall_Form_CivicallFor
 
   public function postProcess(): void {
     $values = $this->exportValues();
-    try {
-      $startCallDate = DateTime::createFromFormat('U', $values['start_call_time_timestamp']);
-    } catch (Exception $e) {
-      throw new Exception('Wrong start call date');
+
+    if (CallCenterActions::isAction($values, CallCenterActions::RESCHEDULE_CALL)) {
+      $this->runRescheduleCallAction($values);
+    } elseif (CallCenterActions::isAction($values,CallCenterActions::CLOSE_CALL)) {
+      $this->runCloseCallAction($values);
+    } elseif (CallCenterActions::isAction($values,CallCenterActions::REOPEN_CALL) && $this->isCallAlreadyClosed) {
+      $this->runReopenCallAction($values);
+    } elseif (CallCenterActions::isAction($values,CallCenterActions::UPDATE_CALL_RESPONSE) && $this->isCallAlreadyClosed) {
+      $this->runUpdateCallResponseAction($values);
+    } else {
+      throw new Exception('Unexpected CallCenter action.');
     }
-    if (!($startCallDate instanceof DateTime)) {
-      throw new Exception('Wrong start call date');
+
+    $this->fixFormRedirection();
+    parent::postProcess();
+  }
+
+  private function runReopenCallAction($values) {
+    $callLogsCount = CallLogsUtils::getActivityCallLogsCount($this->activity['id']);
+    $responseActivityIds = CivicallUtils::getRelatedResponseActivities($this->activity['id']);
+
+    foreach ($responseActivityIds as $responseActivityId) {
+      Activity::delete()->addWhere('id', '=', $responseActivityId)->execute();
     }
 
-    $isRescheduleAction = isset($values[self::getRescheduleButtonName()]);
-    $isCloseAndSaveAction = isset($values[self::getCloseAndSaveButtonName()]);
-    $currentTimeZone = (new DateTime)->getTimezone()->getName();
-    $startCallDate->setTimeZone(new DateTimeZone($currentTimeZone));
+    Activity::update()
+      ->addWhere('id', '=', $this->activity['id'])
+      ->addValue('status_id:name', 'Scheduled')
+      ->addValue('civicall_call_details.final_response_date', null)
+      ->addValue('civicall_call_details.civicall_call_final_response', null)
+      ->addValue('details', $values['notes'])
+      ->addValue('activity_date_time', $values['reopen_scheduled_call_date'])
+      ->addValue('civicall_call_details.civicall_response_counter', $callLogsCount)
+      ->addValue('civicall_call_details.civicall_schedule_date', $values['reopen_scheduled_call_date'])
+      ->execute();
+  }
 
-    if ($isCloseAndSaveAction) {
-      $optionValue = OptionValue::get()
-        ->addSelect('value')
-        ->addWhere('id', '=', $values['final_call_response'])
-        ->execute()
-        ->first();
-      $finalCallResponseValue = $optionValue['value'];
+  private function runUpdateCallResponseAction($values) {
+    $startCallDate = CivicallUtils::convertTimestampToDateTimeObject(($values['start_call_time_timestamp'] ?? null));
+    CivicallUtils::removeLastCallLogs($values['activity_id']);
 
-      Activity::update()
-        ->addWhere('id', '=', $this->activity['id'])
-        ->addValue('status_id:name', 'Completed')
-        ->addValue('civicall_call_details.final_response_date', $values['response_call_date'])
-        ->addValue('civicall_call_details.civicall_call_final_response', $finalCallResponseValue)
-        ->execute();
+    CallLogs::create()
+      ->addValue('activity_id', $values['activity_id'])
+      ->addValue('call_start_date', $startCallDate->format('Y-m-d H:i:s'))
+      ->addValue('call_end_date', (new DateTime)->format('Y-m-d H:i:s'))
+      ->addValue('created_by_contact_id', CRM_Core_Session::getLoggedInContactID())
+      ->addValue('call_response_option_value_id', $values['new_final_call_response'])
+      ->execute();
 
-      $responseActivity = Activity::create()
-        ->addValue('activity_type_id:name', CivicallSettings::RESPONSE_CALL_ACTIVITY_TYPE)
-        ->addValue('activity_type_id:description', 'Response Outgoing Call')
-        ->addValue('subject', 'Response Outgoing Call')
-        ->addValue('activity_date_time', $values['response_call_date'])
-        ->addValue('source_contact_id', CRM_Core_Session::getLoggedInContactID())
-        ->addValue('target_contact_id', $this->targetContact['id'])
-        ->execute()
-        ->first();
+    Activity::update()
+      ->addWhere('id', '=', $this->activity['id'])
+      ->addValue('status_id:name', 'Scheduled')
+      ->addValue('civicall_call_details.final_response_date', $values['new_response_call_date'])
+      ->addValue('civicall_call_details.civicall_call_final_response', CallResponses::getResponseValueById($values['new_final_call_response']))
+      ->addValue('details', $values['notes'])
+      ->execute();
+  }
 
-      CivicallUtils::linkActivity($responseActivity['id'], $this->activity['id']);
-
-      CRM_Core_Session::setStatus(E::ts("Closed call and saved!"), E::ts('Success'), 'success');
-    } elseif ($isRescheduleAction) {
-      Activity::update()
-        ->addWhere('id', '=', $this->activity['id'])
-        ->addValue('activity_date_time', $values['scheduled_call_date'])
-        ->addValue('status_id:name', 'Scheduled')
-        ->addValue('civicall_call_details.civicall_schedule_date', $values['scheduled_call_date'])
-        ->execute();
-
-      CRM_Core_Session::setStatus(E::ts("Call is rescheduled!"), E::ts('Success'), 'success');
-    }
+  private function runRescheduleCallAction($values) {
+    $startCallDate = CivicallUtils::convertTimestampToDateTimeObject(($values['start_call_time_timestamp'] ?? null));
 
     CallLogs::create()
       ->addValue('activity_id', $values['activity_id'])
@@ -176,15 +185,55 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Civicall_Form_CivicallFor
       ->addValue('call_response_option_value_id', $values['preliminary_call_response'])
       ->execute();
 
-    $callLogsCount = CivicallUtils::getActivityCallLogsCount($this->activity['id']);
+    $callLogsCount = CallLogsUtils::getActivityCallLogsCount($this->activity['id']);
 
     Activity::update()
-      ->addValue('details', $values['notes'])
       ->addWhere('id', '=', $this->activity['id'])
+      ->addValue('activity_date_time', $values['scheduled_call_date'])
+      ->addValue('status_id:name', 'Scheduled')
+      ->addValue('civicall_call_details.civicall_schedule_date', $values['scheduled_call_date'])
+      ->addValue('details', $values['notes'])
       ->addValue('civicall_call_details.civicall_response_counter', $callLogsCount)
       ->execute();
 
-    parent::postProcess();
+    CRM_Core_Session::setStatus(E::ts("Call is rescheduled!"), E::ts('Success'), 'success');
+  }
+
+  private function runCloseCallAction($values) {
+    $startCallDate = CivicallUtils::convertTimestampToDateTimeObject(($values['start_call_time_timestamp'] ?? null));
+
+    CallLogs::create()
+      ->addValue('activity_id', $values['activity_id'])
+      ->addValue('call_start_date', $startCallDate->format('Y-m-d H:i:s'))
+      ->addValue('call_end_date', (new DateTime)->format('Y-m-d H:i:s'))
+      ->addValue('created_by_contact_id', CRM_Core_Session::getLoggedInContactID())
+      ->addValue('call_response_option_value_id', $values['preliminary_call_response'])
+      ->execute();
+
+    $callLogsCount = CallLogsUtils::getActivityCallLogsCount($this->activity['id']);
+
+    Activity::update()
+      ->addWhere('id', '=', $this->activity['id'])
+      ->addValue('status_id:name', 'Completed')
+      ->addValue('civicall_call_details.final_response_date', $values['response_call_date'])
+      ->addValue('civicall_call_details.civicall_call_final_response', CallResponses::getResponseValueById($values['final_call_response']))
+      ->addValue('details', $values['notes'])
+      ->addValue('civicall_call_details.civicall_response_counter', $callLogsCount)
+      ->execute();
+
+    $responseActivity = Activity::create()
+      ->addValue('activity_type_id:name', CivicallSettings::RESPONSE_CALL_ACTIVITY_TYPE)
+      ->addValue('activity_type_id:description', 'Response Outgoing Call')
+      ->addValue('subject', 'Response Outgoing Call')
+      ->addValue('activity_date_time', $values['response_call_date'])
+      ->addValue('source_contact_id', CRM_Core_Session::getLoggedInContactID())
+      ->addValue('target_contact_id', $this->targetContact['id'])
+      ->execute()
+      ->first();
+
+    CivicallUtils::linkActivity($responseActivity['id'], $this->activity['id']);
+
+    CRM_Core_Session::setStatus(E::ts("Closed call and saved!"), E::ts('Success'), 'success');
   }
 
   public function addRules() {
@@ -194,10 +243,7 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Civicall_Form_CivicallFor
   public static function validateForm($values) {
     $errors = [];
 
-    $isRescheduleAction = isset($values[self::getRescheduleButtonName()]);
-    $isCloseAndSaveAction = isset($values[self::getCloseAndSaveButtonName()]);
-
-    if ($isRescheduleAction) {
+    if (CallCenterActions::isAction($values, CallCenterActions::RESCHEDULE_CALL)) {
       if (empty($values['scheduled_call_date'])) {
         $errors['scheduled_call_date'] = "Scheduled Call Date is required field!";
       }
@@ -206,7 +252,7 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Civicall_Form_CivicallFor
       }
     }
 
-    if ($isCloseAndSaveAction) {
+    if (CallCenterActions::isAction($values, CallCenterActions::CLOSE_CALL)) {
       if (empty($values['response_call_date'])) {
         $errors['response_call_date'] = "Response Date is required field!";
       }
@@ -215,19 +261,22 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Civicall_Form_CivicallFor
       }
     }
 
+    if (CallCenterActions::isAction($values, CallCenterActions::REOPEN_CALL)) {
+      if (empty($values['reopen_scheduled_call_date'])) {
+        $errors['reopen_scheduled_call_date'] = "Reopen scheduled Date is required field!";
+      }
+    }
+
+    if (CallCenterActions::isAction($values, CallCenterActions::UPDATE_CALL_RESPONSE)) {
+      if (empty($values['new_response_call_date'])) {
+        $errors['new_response_call_date'] = "New response Date is required field!";
+      }
+      if (empty($values['new_final_call_response'])) {
+        $errors['new_final_call_response'] = "New final response response is required field!";
+      }
+    }
+
     return empty($errors) ? TRUE : $errors;
-  }
-
-  public static function getRescheduleButtonName() {
-    return '_qf_CivicallCallCenter_next';
-  }
-
-  public static function getCloseAndSaveButtonName() {
-    return '_qf_CivicallCallCenter_submit';
-  }
-
-  public static function getCloseAndWithoutSaveButtonName() {
-    return '_qf_CivicallCallCenter_cancel';
   }
 
   public function setDefaultValues() {
@@ -235,6 +284,8 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Civicall_Form_CivicallFor
 
     $defaults['notes'] = $this->activity['details'];
     $defaults['response_call_date'] = (new DateTime())->format('Y-m-d H:i:s');
+    $defaults['reopen_scheduled_call_date'] = (new DateTime())->format('Y-m-d H:i:s');
+    $defaults['new_response_call_date'] = (new DateTime())->format('Y-m-d H:i:s');
 
     $scheduleOffsets = $this->callCenterConfiguration->getScheduleOffsets();
     if (!empty($scheduleOffsets[$this->callLogsCount]['calculatedDate'])) {
@@ -253,6 +304,13 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Civicall_Form_CivicallFor
     }
 
     throw new Exception($message);
+  }
+
+  private function fixFormRedirection() {
+    $session = CRM_Core_Session::singleton();
+    $this->context = CRM_Utils_System::url('civicrm/civicall/call-center', "reset=1&activity_id={$this->activity['id']}");
+    $session->pushUserContext($this->context);
+    $this->controller->_destination = $this->context;
   }
 
 }

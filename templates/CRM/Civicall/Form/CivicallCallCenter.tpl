@@ -25,9 +25,12 @@
 
     {if (!empty($callLogs))}
       <div class="call-center__call-logs-table-wrap">
-          <table class="civicall__table table--border-less table--padding-less call-center__call-logs-table">
+          <table class="civicall__table table--border-less table--padding-less call-center__call-logs-table table--first-column-padding">
             {foreach from=$callLogs item=log}
               <tr>
+                <td class="table--column-padding-right">
+                  <span><b>{$log.call_number}.</b></span>
+                </td>
                 <td>
                   <span>{$log.formatted_start_date} ({$log.duration})</span>
                 </td>
@@ -98,72 +101,131 @@
           </div>
 
           <div class="call-center__actions">
-            <div class="call-center__action-wrap">
-              <div class="call-center__sub-title">Reschedule Call</div>
-              <div class="call-center__action-row">
-                <div class="call-center__action-row-item">
-                  <div class="call-center__action-row-item-title">
-                    {$form.scheduled_call_date.label}
+            {if !$isCallAlreadyClosed}
+              <div class="call-center__action-wrap">
+                <div class="call-center__sub-title">Reschedule Call</div>
+                <div class="call-center__action-row">
+                  <div class="call-center__action-row-item">
+                    <div class="call-center__action-row-item-title">
+                      {$form.scheduled_call_date.label}
+                    </div>
+                    <div class="call-center__action-row-item-content">
+                      {$form.scheduled_call_date.html}
+                    </div>
                   </div>
-                  <div class="call-center__action-row-item-content">
-                    {$form.scheduled_call_date.html}
+
+                  <div class="call-center__action-row-item">
+                    <div class="call-center__action-row-item-title">
+                      {$form.preliminary_call_response.label}
+                    </div>
+                    <div class="call-center__action-row-item-content">
+                      {$form.preliminary_call_response.html}
+                    </div>
+                  </div>
+
+                  <div class="call-center__action-row-item">
+                    <button class="civicall__button civicall--blue civicall--height-medium crm-form-submit validate crm-button crm-button-type-next crm-button{$rescheduleCallButtonName}" value="1" type="submit" name="{$rescheduleCallButtonName}" id="{$rescheduleCallButtonName}-bottom">
+                      <i aria-hidden="true" class="crm-i fa-calendar"></i>
+                      <span>RE-RESCHEDULE CALL</span>
+                    </button>
                   </div>
                 </div>
-
-                <div class="call-center__action-row-item">
-                  <div class="call-center__action-row-item-title">
-                    {$form.preliminary_call_response.label}
+                {if !empty($responseLimitMessage)}
+                  <div class="call-center__message-wrap">
+                    <div class="status">
+                      {$responseLimitMessage}
+                    </div>
                   </div>
-                  <div class="call-center__action-row-item-content">
-                    {$form.preliminary_call_response.html}
-                  </div>
-                </div>
+                {/if}
+              </div>
+            {/if}
 
-                <div class="call-center__action-row-item">
-                  <button class="civicall__button civicall--blue civicall--height-medium crm-form-submit validate crm-button crm-button-type-next crm-button{$rescheduleButtonName}" value="1" type="submit" name="{$rescheduleButtonName}" id="{$rescheduleButtonName}-bottom">
-                    <i aria-hidden="true" class="crm-i fa-calendar"></i>
-                    <span>RE-RESCHEDULE CALL</span>
-                  </button>
+            {if !$isCallAlreadyClosed}
+              <div class="call-center__action-wrap">
+                <div class="call-center__sub-title">Close Call</div>
+                <div class="call-center__action-row">
+                  <div class="call-center__action-row-item">
+                    <div class="call-center__action-row-item-title">
+                      {$form.response_call_date.label}
+                    </div>
+                    <div class="call-center__action-row-item-content">
+                      {$form.response_call_date.html}
+                    </div>
+                  </div>
+
+                  <div class="call-center__action-row-item">
+                    <div class="call-center__action-row-item-title">
+                      {$form.final_call_response.label}
+                    </div>
+                    <div class="call-center__action-row-item-content">
+                      {$form.final_call_response.html}
+                    </div>
+                  </div>
+
+                  <div class="call-center__action-row-item">
+                    <button class="civicall__button civicall--green civicall--height-medium crm-form-submit validate crm-button crm-button-type-submit crm-button{$closeCallButtonName}" value="1" type="submit" name="{$closeCallButtonName}" id="{$closeCallButtonName}-bottom">
+                      <i aria-hidden="true" class="crm-i fa-check"></i>
+                      <span>SAVE AND CLOSE CALL</span>
+                    </button>
+                  </div>
                 </div>
               </div>
-              {if !empty($responseLimitMessage)}
-                <div class="call-center__message-wrap">
-                  <div class="status">
-                    {$responseLimitMessage}
-                  </div>
-                </div>
-              {/if}
-            </div>
+            {/if}
 
-            <div class="call-center__action-wrap">
-              <div class="call-center__sub-title">Close Call</div>
-              <div class="call-center__action-row">
-                <div class="call-center__action-row-item">
-                  <div class="call-center__action-row-item-title">
-                    {$form.response_call_date.label}
+            {if $isCallAlreadyClosed}
+              <div class="call-center__action-wrap">
+                <div class="call-center__sub-title">Reopen Call</div>
+                <div class="call-center__action-row">
+                  <div class="call-center__action-row-item">
+                    <div class="call-center__action-row-item-title">
+                      {$form.reopen_scheduled_call_date.label}
+                    </div>
+                    <div class="call-center__action-row-item-content">
+                      {$form.reopen_scheduled_call_date.html}
+                    </div>
                   </div>
-                  <div class="call-center__action-row-item-content">
-                    {$form.response_call_date.html}
-                  </div>
-                </div>
 
-                <div class="call-center__action-row-item">
-                  <div class="call-center__action-row-item-title">
-                    {$form.final_call_response.label}
+                  <div class="call-center__action-row-item">
+                    <button class="civicall__button civicall--blue civicall--height-medium crm-form-submit validate crm-button crm-button-type-submit crm-button{$reopenCallButtonName}" value="1" type="submit" name="{$reopenCallButtonName}" id="{$reopenCallButtonName}-bottom">
+                      <i aria-hidden="true" class="crm-i fa-calendar"></i>
+                      <span>SAVE AND REOPEN CALL</span>
+                    </button>
                   </div>
-                  <div class="call-center__action-row-item-content">
-                    {$form.final_call_response.html}
-                  </div>
-                </div>
-
-                <div class="call-center__action-row-item">
-                  <button class="civicall__button civicall--green civicall--height-medium crm-form-submit validate crm-button crm-button-type-submit crm-button{$closeAndSaveButtonName}" value="1" type="submit" name="{$closeAndSaveButtonName}" id="{$closeAndSaveButtonName}-bottom">
-                    <i aria-hidden="true" class="crm-i fa-check"></i>
-                    <span>SAVE AND CLOSE CALL</span>
-                  </button>
                 </div>
               </div>
-            </div>
+            {/if}
+
+            {if $isCallAlreadyClosed}
+              <div class="call-center__action-wrap">
+                <div class="call-center__sub-title">Update Call Response</div>
+                <div class="call-center__action-row">
+                  <div class="call-center__action-row-item">
+                    <div class="call-center__action-row-item-title">
+                      {$form.new_response_call_date.label}
+                    </div>
+                    <div class="call-center__action-row-item-content">
+                      {$form.new_response_call_date.html}
+                    </div>
+                  </div>
+
+                  <div class="call-center__action-row-item">
+                    <div class="call-center__action-row-item-title">
+                      {$form.new_final_call_response.label}
+                    </div>
+                    <div class="call-center__action-row-item-content">
+                      {$form.new_final_call_response.html}
+                    </div>
+                  </div>
+
+                  <div class="call-center__action-row-item">
+                    <button class="civicall__button civicall--green civicall--height-medium crm-form-submit validate crm-button crm-button-type-submit crm-button{$updateCallResponseButtonName}" value="1" type="submit" name="{$updateCallResponseButtonName}" id="{$updateCallResponseButtonName}-bottom">
+                      <i aria-hidden="true" class="crm-i fa-check"></i>
+                      <span>SAVE AND UPDATE CALL RESPONSE</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            {/if}
           </div>
 
           {$form.start_call_time_timestamp.html}
@@ -171,7 +233,7 @@
 
           <div class="call-center__buttons-wrap">
             <div class="crm-submit-buttons">
-              <button class="civicall__button civicall--red civicall--height-big crm-form-submit cancel crm-button crm-button-type-cancel crm-button{$closeAndWithoutSaveButtonName}" value="1" type="submit" name="{$closeAndWithoutSaveButtonName}" id="{$closeAndWithoutSaveButtonName}-bottom">
+              <button class="civicall__button civicall--red civicall--height-big crm-form-submit cancel crm-button crm-button-type-cancel crm-button{$cancelButtonName}" value="1" type="submit" name="{$cancelButtonName}" id="{$cancelButtonName}-bottom">
                 <i aria-hidden="true" class="crm-i fa-window-close"></i>
                 <span>Close call without save</span>
               </button>

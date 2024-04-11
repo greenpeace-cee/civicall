@@ -3,15 +3,21 @@
 namespace Civi\Civicall\Utils;
 
 use Civi\Api4\Activity;
+use Civi\Api4\CallLogs;
+use Civi\Api4\CustomField;
+use Civi\CompilePlugin\PackageSorter;
 use CRM_Core_PseudoConstant;
 use CRM_Utils_System;
 use DateTime;
+use DateTimeZone;
+use Exception;
+use function Matrix\identity;
 
 class CivicallUtils {
 
   public static function getCivicallActivities($params) {
     $activities = \Civi\Api4\Activity::get()
-      ->addSelect('id', 'subject')
+      ->addSelect('id', 'subject', 'campaign_id')
       ->addWhere('activity_type_id:name', '=', CivicallSettings::OUTGOING_CALL_ACTIVITY_TYPE)
       ->execute();
 
@@ -22,6 +28,7 @@ class CivicallUtils {
         'subject' => $activity['subject'],
         'callCenterLink' => CRM_Utils_System::url('civicrm/civicall/call-center', "reset=1&activity_id=" . $activity['id']),
         'editActivityLink' => CRM_Utils_System::url('civicrm/activity/add', "reset=1&action=update&id=" . $activity['id']),
+        'editCampaignLink' => CRM_Utils_System::url('civicrm/campaign/add', "reset=1&action=update&id=" . $activity['campaign_id']),
       ];
     }
 
@@ -117,59 +124,7 @@ class CivicallUtils {
     return $preparedPhones;
   }
 
-  public static function getCallCenterLogs($activityId) {
-    $logs = [];
-    if (empty($activityId)) {
-      return $logs;
-    }
-
-    $callLogs = \Civi\Api4\CallLogs::get()
-      ->addWhere('activity_id', '=', $activityId)
-      ->execute();
-
-    foreach ($callLogs as $callLog) {
-      $contactId = $callLog['created_by_contact_id'];
-      $contact = \Civi\Api4\Contact::get()
-        ->addSelect('display_name')
-        ->addWhere('id', '=', $contactId)
-        ->setLimit(1)
-        ->execute()
-        ->first();
-
-      $optionValue = \Civi\Api4\OptionValue::get()
-        ->addSelect('label')
-        ->addWhere('id', '=', $callLog['call_response_option_value_id'])
-        ->setLimit(1)
-        ->execute()
-        ->first();
-
-      $startCallDate = DateTime::createFromFormat('Y-m-d H:i:s', $callLog['call_start_date']);
-      $endCallDate = DateTime::createFromFormat('Y-m-d H:i:s', $callLog['call_end_date']);
-      $elapsedTimestamp = $endCallDate->getTimestamp() - $startCallDate->getTimestamp();
-      $minutes = (int) ($elapsedTimestamp / 60);
-      $seconds = $elapsedTimestamp % 60;
-      $durationText = '';
-
-      if ($minutes !== 0) {
-        $durationText .= $minutes . ' minute' . (($minutes === 1) ? '' : 's') . ' ';
-      }
-
-      $durationText .= $seconds . ' second' . (($seconds === 1) ? '' : 's');
-
-      $logs[] = [
-        'created_by_display_name' => $contact['display_name'],
-        'created_by_contact_Link' => CRM_Utils_System::url('civicrm/contact/view', "reset=1&cid=" . $contactId),
-        'formatted_start_date' => $callLog['call_start_date'],
-        'duration' => $durationText,
-        'responseLabel' => $optionValue['label'],
-      ];
-    }
-
-    return $logs;
-  }
-
-  public static function getActivityTargetContactId($activityId)
-  {
+  public static function getActivityTargetContactId($activityId) {
     if (empty($activityId)) {
       return NULL;
     }
@@ -220,20 +175,57 @@ class CivicallUtils {
     return [];
   }
 
-  public static function getActivityCallLogsCount($activityId) {
-    if (empty($activityId)) {
-      return 0;
+  public static function linkActivity($childActivityId, $parentActivityId) {
+    $activity = Activity::update();
+    $activity->addWhere('id', '=', $childActivityId);
+
+    if (CivicallUtils::isActivityHasHierarchyCustomField()) {
+      $activity->addValue('activity_hierarchy.parent_activity_id', $parentActivityId);
+    } else {
+      $activity->addValue('parent_id', $parentActivityId);
     }
 
-    return \Civi\Api4\CallLogs::get()
-      ->addWhere('activity_id', '=', $activityId)
-      ->execute()
-      ->count();
+    $activity->execute();
   }
 
-  public static function linkActivity($childActivityId, $parentActivityId) {
+  public static function isCallAlreadyClosed($activityId) {
+    $activity = Activity::get()
+      ->addSelect(  'status_id:name', 'civicall_call_details.civicall_call_final_response')
+      ->addWhere('id', '=', $activityId)
+      ->execute()
+      ->first();
+
+    if (!empty($activity['civicall_call_details.civicall_call_final_response'])) {
+      return true;
+    }
+
+    if (!empty($activity['status_id:name'] === 'Completed')) {
+      return true;
+    }
+
+    return false;
+  }
+
+  public static function convertTimestampToDateTimeObject($timestamp) {
+    try {
+      $dateTime = DateTime::createFromFormat('U', $timestamp);
+    } catch (Exception $e) {
+      throw new Exception('Wrong start call date');
+    }
+    if (!($dateTime instanceof DateTime)) {
+      throw new Exception('Wrong start call date');
+    }
+
+    $currentTimeZone = (new DateTime)->getTimezone()->getName();
+    $dateTime->setTimeZone(new DateTimeZone($currentTimeZone));
+
+    return $dateTime;
+  }
+
+  public static function isActivityHasHierarchyCustomField() {
     $isActivityHasHierarchyCustomField = false;
-    $customField = \Civi\Api4\CustomField::get()
+
+    $customField = CustomField::get()
       ->addWhere('custom_group_id:name', '=', 'activity_hierarchy')
       ->addWhere('name', '=', 'parent_activity_id')
       ->addWhere('custom_group_id.extends', '=', 'Activity')
@@ -244,16 +236,52 @@ class CivicallUtils {
       $isActivityHasHierarchyCustomField = true;
     }
 
-    $activity = Activity::update();
-    $activity->addWhere('id', '=', $childActivityId);
+    return $isActivityHasHierarchyCustomField;
+  }
 
-    if ($isActivityHasHierarchyCustomField) {
-      $activity->addValue('activity_hierarchy.parent_activity_id', $parentActivityId);
-    } else {
-      $activity->addValue('parent_id', $parentActivityId);
+  public static function getRelatedResponseActivities($activityId) {
+    $responseActivityIds = [];
+
+    if (empty($activityId)) {
+      return $responseActivityIds;
     }
 
-    $activity->execute();
+    $activityEntity = Activity::get();
+    $activityEntity->addSelect('id', 'subject', 'campaign_id');
+    $activityEntity->addWhere('activity_type_id:name', '=', CivicallSettings::RESPONSE_CALL_ACTIVITY_TYPE);
+
+    if (CivicallUtils::isActivityHasHierarchyCustomField()) {
+      $activityEntity->addWhere('activity_hierarchy.parent_activity_id', '=', $activityId);
+    } else {
+      $activityEntity->addWhere('parent_id', '=', $activityId);
+    }
+
+    $activities = $activityEntity->execute();
+
+    foreach ($activities as $activity) {
+      $responseActivityIds[] = $activity['id'];
+    }
+
+    return $responseActivityIds;
+  }
+
+  public static function removeLastCallLogs($activityId) {
+    if (empty($activityId)) {
+      return;
+    }
+
+    $callLog = CallLogs::get()
+      ->addSelect('id')
+      ->addWhere('activity_id', '=', $activityId)
+      ->addOrderBy('id', 'DESC')
+      ->setLimit(1)
+      ->execute()
+      ->first();
+    if (empty($callLog['id'])) {
+      return;
+    }
+
+    CallLogs::delete()->addWhere('id', '=', $callLog['id'])->execute();
   }
 
 }

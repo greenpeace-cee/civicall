@@ -29,7 +29,7 @@ function civicall_civicrm_navigationMenu(&$menu) {
     'icon' => 'crm-i fa-phone',
     'name' => 'Civicall_Dashboard',
     'url' => 'civicrm/civicall/dashboard',
-    'permission' => 'access CiviCRM',
+    'permission' => 'administer CiviCRM',
     'operator' => 'OR',
     'separator' => 0,
     'weight' => 70,
@@ -45,7 +45,7 @@ function civicall_civicrm_validateForm($formName, &$fields, &$files, &$form, &$e
       if ($form->getAction() === NULL) {// it is ADD action
         $fieldName = 'custom_' . $configurationCustomFieldId . '_-1';
       } elseif ($form->getAction() === CRM_Core_Action::UPDATE) {
-        $fieldName = 'custom_' . $configurationCustomFieldId . '_' . CRM_Core_Action::UPDATE;
+        $fieldName = 'custom_' . $configurationCustomFieldId . '_' . $form->controller->get('entityId');
       }
 
       $configurationValue = NULL;
