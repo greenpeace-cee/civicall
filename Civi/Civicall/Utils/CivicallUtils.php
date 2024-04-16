@@ -5,21 +5,30 @@ namespace Civi\Civicall\Utils;
 use Civi\Api4\Activity;
 use Civi\Api4\CallLogs;
 use Civi\Api4\CustomField;
-use Civi\CompilePlugin\PackageSorter;
 use CRM_Core_PseudoConstant;
 use CRM_Utils_System;
 use DateTime;
 use DateTimeZone;
 use Exception;
-use function Matrix\identity;
 
 class CivicallUtils {
 
   public static function getCivicallActivities($params) {
-    $activities = \Civi\Api4\Activity::get()
-      ->addSelect('id', 'subject', 'campaign_id')
-      ->addWhere('activity_type_id:name', '=', CivicallSettings::OUTGOING_CALL_ACTIVITY_TYPE)
-      ->execute();
+    $activityEntity = Activity::get();
+    $activityEntity->addSelect('id', 'subject', 'campaign_id');
+    $activityEntity->addWhere('activity_type_id:name', '=', CivicallSettings::OUTGOING_CALL_ACTIVITY_TYPE);
+
+    if (!empty($params['limit'])) {
+      $activityEntity->setLimit($params['limit']);
+    }
+    if (!empty($params['target_contact_id'])) {
+      $targetContactRecordTypeId = CRM_Core_PseudoConstant::getKey('CRM_Activity_BAO_ActivityContact', 'record_type_id', 'Activity Targets');
+      $activityEntity->addJoin('ActivityContact AS activity_contact', 'LEFT', ['id', '=', 'activity_contact.activity_id']);
+      $activityEntity->addWhere('activity_contact.record_type_id', '=', $targetContactRecordTypeId);
+      $activityEntity->addWhere('activity_contact.contact_id', '=', $params['target_contact_id']);
+    }
+
+    $activities = $activityEntity->execute();
 
     $preparedActivities = [];
     foreach ($activities as $activity) {
@@ -302,6 +311,16 @@ class CivicallUtils {
     }
 
     return false;
+  }
+
+  public static function isStringContains($searchByString, $targetString) {
+    $pos = strpos($targetString, $searchByString);
+
+    if ($pos === false) {
+      return false;
+    }
+
+    return true;
   }
 
 }

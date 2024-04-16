@@ -74,6 +74,7 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Core_Form {
     $this->assign('isFormInPopup', $this->isFormInPopup);
     $this->assign('isCallAlreadyClosed', $this->isCallAlreadyClosed);
     $this->assign('callCenterJsUrl', CRM_Civicall_ExtensionUtil::url('js/civicall.js'));
+    $this->assign('alreadyClosedCallMessage', CivicallSettings::getAlreadyClosedCallMessage());
 
     $this->assign('rescheduleCallButtonName', CallCenterActions::getButtonName(CallCenterActions::RESCHEDULE_CALL));
     $this->assign('closeCallButtonName', CallCenterActions::getButtonName(CallCenterActions::CLOSE_CALL));
@@ -117,9 +118,9 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Core_Form {
   public function postProcess(): void {
     $values = $this->exportValues();
 
-    if (CallCenterActions::isAction($values, CallCenterActions::RESCHEDULE_CALL)) {
+    if (CallCenterActions::isAction($values, CallCenterActions::RESCHEDULE_CALL) && !$this->isCallAlreadyClosed) {
       $this->runRescheduleCallAction($values);
-    } elseif (CallCenterActions::isAction($values,CallCenterActions::CLOSE_CALL)) {
+    } elseif (CallCenterActions::isAction($values,CallCenterActions::CLOSE_CALL) && !$this->isCallAlreadyClosed) {
       $this->runCloseCallAction($values);
     } elseif (CallCenterActions::isAction($values,CallCenterActions::REOPEN_CALL) && $this->isCallAlreadyClosed) {
       $this->runReopenCallAction($values);

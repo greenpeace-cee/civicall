@@ -2,6 +2,8 @@
 
 namespace Civi\Civicall\Utils;
 
+use CRM_Civicall_ExtensionUtil;
+
 class CivicallSettings {
 
   const OUTGOING_CALL_ACTIVITY_TYPE = 'Outgoing Call';
@@ -40,5 +42,18 @@ class CivicallSettings {
     return NULL;
   }
 
+  public static function getAlreadyClosedCallMessage() {
+    return "This call is already closed!";
+  }
+
+  public static function getExampleCallConfig() {
+    $exampleCallConfigPath = CRM_Civicall_ExtensionUtil::path('exampleCallConfig.json');
+
+    if (!file_exists($exampleCallConfigPath)) {
+      return '';
+    }
+
+    return file_get_contents($exampleCallConfigPath);
+  }
 
 }

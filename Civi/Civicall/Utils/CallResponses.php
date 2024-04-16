@@ -2,6 +2,7 @@
 
 namespace Civi\Civicall\Utils;
 
+use Civi\Api4\OptionGroup;
 use Civi\Api4\OptionValue;
 
 class CallResponses {
@@ -74,6 +75,32 @@ class CallResponses {
         'value' => $optionValue['value'],
       ];
     }
+  }
+
+  public static function getAvailableResponsesNames() {
+    CallResponses::setResponses();
+    $responseNames = [];
+
+    foreach (CallResponses::$responses as $response) {
+      $responseNames[] = $response['name'];
+    }
+
+    return $responseNames;
+  }
+
+  public static function getCallResponsesOptionGroupId() {
+    $optionGroup = OptionGroup::get()
+      ->addSelect('id')
+      ->addWhere('name', '=', CallResponses::RESPONSES_OPTION_GROUP_NAME)
+      ->execute()
+      ->first();
+
+
+    if (empty($optionGroup['id'])) {
+      return null;
+    }
+
+    return $optionGroup['id'];
   }
 
 }

@@ -59,16 +59,18 @@
     </div>
   </div>
 
-  <div class="call-center__call-scripts-wrap">
-    <div class="civicall__accordion crm-accordion-wrapper collapsed">
-      <div class="crm-accordion-header crm-master-accordion-header">Call Scripts</div>
-      <div class="crm-accordion-body">
-        <div class="call-center__call-scripts">
-          {$activity.campaignScript}
+  {if (!empty($activity.campaignScript))}
+    <div class="call-center__call-scripts-wrap">
+      <div class="civicall__accordion crm-accordion-wrapper collapsed">
+        <div class="crm-accordion-header crm-master-accordion-header">Call Scripts</div>
+        <div class="crm-accordion-body">
+          <div class="call-center__call-scripts">
+            {$activity.campaignScript}
+          </div>
         </div>
       </div>
     </div>
-  </div>
+  {/if}
 
   {if (!empty($pageLoaderConfiguration))}
     <div class="call-center__dynamic-block-wrap">
@@ -99,6 +101,14 @@
               {$form.notes.html}
             </div>
           </div>
+
+          {if $isCallAlreadyClosed && !empty($alreadyClosedCallMessage)}
+            <div class="call-center__already-closed-call-message-wrap">
+              <div class="call-center__already-closed-call-message">
+                <div class="status">{$alreadyClosedCallMessage}</div>
+              </div>
+            </div>
+          {/if}
 
           <div class="call-center__actions">
             {if !$isCallAlreadyClosed}
