@@ -25,7 +25,7 @@ class ApplyCallCenterLinks {
     $event->links[] = [
       'name' => 'Edit Call',
       'title' => 'Edit Call',
-      'qs' => 'reset=1&activity_id=%%id%%',
+      'qs' => 'reset=1&activity_id=' . $event->objectId,
       'url' => 'civicrm/civicall/call-center',
     ];
   }
