@@ -75,20 +75,37 @@
             <div class="call-center__sub-title">Results:</div>
 
             {foreach from=$civicallActivities item=activity}
-              <ul>
-                <li style="border-bottom: 1px solid grey; margin-bottom: 10px; max-width: 300px">
+              <div class="civicall__dashboard-result-item">
+                <div>
                   <div>id=[{$activity.id}]:{$activity.subject}</div>
-                  <div>
-                    <a class="crm-popup" href="{$activity.callCenterLink}">Call center link</a>
+                  <div class="civicall__dashboard-result-item-content">
+                    <div>
+                      <a class="crm-popup" href="{$activity.callCenterLink}">Call center link</a>
+                    </div>
+                    <div>
+                      <a class="crm-popup" href="{$activity.editActivityLink}" target="_blank">Edit activity link</a>
+                    </div>
+                    <div>
+                      <a class="crm-popup" href="{$activity.editCampaignLink}" target="_blank">Edit campaign link</a>
+                    </div>
+
+                    <div>
+                      <div>Related response activities:</div>
+                      <div class="civicall__dashboard-result-item-response-activities">
+                      {if !empty($activity.responseActivities)}
+                          {foreach from=$activity.responseActivities item=responseActivity}
+                            <div style="padding-left: 10px">
+                              <a class="crm-popup" href="{$responseActivity.link}" target="_blank">id=[{$activity.id}]</a>
+                            </div>
+                          {/foreach}
+                      {else}
+                        <div>can't find eny related response activities</div>
+                      {/if}
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <a class="crm-popup" href="{$activity.editActivityLink}" target="_blank">Edit activity link</a>
-                  </div>
-                  <div>
-                    <a class="crm-popup" href="{$activity.editCampaignLink}" target="_blank">Edit campaign link</a>
-                  </div>
-                </li>
-              </ul>
+                </div>
+              </div>
             {/foreach}
           </div>
         </div>

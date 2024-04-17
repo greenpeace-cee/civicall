@@ -32,12 +32,22 @@ class CivicallUtils {
 
     $preparedActivities = [];
     foreach ($activities as $activity) {
+      $responseActivities = [];
+      $responseActivityIds = CivicallUtils::getRelatedResponseActivities($activity['id']);
+      foreach ($responseActivityIds as $responseActivityId) {
+        $responseActivities[] = [
+          'id' => $responseActivityId,
+          'link' => CRM_Utils_System::url('civicrm/activity/add', "reset=1&action=update&id=" . $responseActivityId),
+        ];
+      }
+
       $preparedActivities[] = [
         'id' => $activity['id'],
         'subject' => $activity['subject'],
         'callCenterLink' => CRM_Utils_System::url('civicrm/civicall/call-center', "reset=1&activity_id=" . $activity['id']),
         'editActivityLink' => CRM_Utils_System::url('civicrm/activity/add', "reset=1&action=update&id=" . $activity['id']),
         'editCampaignLink' => CRM_Utils_System::url('civicrm/campaign/add', "reset=1&action=update&id=" . $activity['campaign_id']),
+        'responseActivities' => $responseActivities,
       ];
     }
 
