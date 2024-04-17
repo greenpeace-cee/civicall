@@ -20,6 +20,10 @@ class ApplyCallCenterLinks {
       return;
     }
 
+    if (!CivicallUtils::isOutgoingCallActivity($event->objectId)) {
+      return;
+    }
+
     $event->links = self::removeEditRawActivityLinks($event->links);
 
     $event->links[] = [
