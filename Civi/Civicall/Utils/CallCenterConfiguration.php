@@ -99,6 +99,11 @@ class CallCenterConfiguration {
         $isCollapsed = false;
       }
 
+      $afformLoader = new AfformLoader($pageConfig['afformModuleName'], []);
+      if (!$afformLoader->isAfformExist()) {
+        $this->setWarningMessage('Afform Module "'.  $pageConfig['afformModuleName'] . '" doesn\'t exist.');
+      }
+
       $preparedPageLoader[] = [
         'title' => $pageConfig['title'],
         'afformModuleName' => $pageConfig['afformModuleName'],

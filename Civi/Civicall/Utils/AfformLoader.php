@@ -36,6 +36,14 @@ class AfformLoader {
     $this->afform = $afform;
   }
 
+  public function isAfformExist() {
+    if (empty($this->afform)) {
+      return false;
+    }
+
+    return true;
+  }
+
   /**
    * @return string
    */
