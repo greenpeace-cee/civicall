@@ -3,7 +3,7 @@
 namespace Civi\Civicall\Utils;
 
 use Civi\Api4\Activity;
-use Civi\Api4\CallLogs;
+use Civi\Api4\CallLog;
 use Civi\Api4\CustomField;
 use CRM_Core_PseudoConstant;
 use CRM_Utils_System;
@@ -289,7 +289,7 @@ class CivicallUtils {
       return null;
     }
 
-    $callLog = CallLogs::get()
+    $callLog = CallLog::get()
       ->addSelect('id')
       ->addWhere('activity_id', '=', $activityId)
       ->addOrderBy('id', 'DESC')
@@ -331,6 +331,26 @@ class CivicallUtils {
     }
 
     return true;
+  }
+
+  public static function isCallCentreEnabled($activityId) {
+    if (empty($activityId)) {
+      return false;
+    }
+
+    $isEnabledFieldName = 'campaign_id.civicall_call_configuration.is_call_center_enabled';
+
+    $activity = Activity::get()
+      ->addSelect($isEnabledFieldName, 'id')
+      ->addWhere('id', '=', $activityId)
+      ->execute()
+      ->first();
+
+    if (isset($activity[$isEnabledFieldName]) && $activity[$isEnabledFieldName] === true) {
+      return true;
+    }
+
+    return false;
   }
 
 }

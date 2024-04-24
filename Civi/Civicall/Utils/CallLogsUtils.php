@@ -2,7 +2,7 @@
 
 namespace Civi\Civicall\Utils;
 
-use Civi\Api4\CallLogs;
+use Civi\Api4\CallLog;
 use CRM_Utils_System;
 use DateTime;
 
@@ -15,12 +15,12 @@ class CallLogsUtils {
     }
 
     $callCount = 1;
-    $callLogs = CallLogs::get()
+    $callLogs = CallLog::get()
       ->addWhere('activity_id', '=', $activityId)
       ->execute();
 
     foreach ($callLogs as $callLog) {
-      $contactId = $callLog['created_by_contact_id'];
+      $contactId = $callLog['created_id'];
       $contact = \Civi\Api4\Contact::get()
         ->addSelect('display_name')
         ->addWhere('id', '=', $contactId)
@@ -28,13 +28,7 @@ class CallLogsUtils {
         ->execute()
         ->first();
 
-      $optionValue = \Civi\Api4\OptionValue::get()
-        ->addSelect('label')
-        ->addWhere('id', '=', $callLog['call_response_option_value_id'])
-        ->setLimit(1)
-        ->execute()
-        ->first();
-
+      $response = CallResponses::getResponseByValue($callLog['call_response_id']);
       $startCallDate = DateTime::createFromFormat('Y-m-d H:i:s', $callLog['call_start_date']);
       $endCallDate = DateTime::createFromFormat('Y-m-d H:i:s', $callLog['call_end_date']);
       $elapsedTimestamp = $endCallDate->getTimestamp() - $startCallDate->getTimestamp();
@@ -53,7 +47,7 @@ class CallLogsUtils {
         'created_by_contact_Link' => CRM_Utils_System::url('civicrm/contact/view', "reset=1&cid=" . $contactId),
         'formatted_start_date' => $callLog['call_start_date'],
         'duration' => $durationText,
-        'responseLabel' => $optionValue['label'],
+        'responseLabel' => $response['label'] ?? 'response(' . $callLog['call_response_id'] . ') is not available',
         'call_number' => $callCount,
       ];
       $callCount++;
@@ -67,7 +61,7 @@ class CallLogsUtils {
       return 0;
     }
 
-    return CallLogs::get()
+    return CallLog::get()
       ->addWhere('activity_id', '=', $activityId)
       ->execute()
       ->count();

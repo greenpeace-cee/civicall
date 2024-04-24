@@ -28,6 +28,39 @@ class CallResponses {
     return $optionValueValue;
   }
 
+  /**
+   * @param $responseOptionValueName
+   * @return string
+   */
+  public static function getResponseValueByName($responseOptionValueName) {
+    CallResponses::setResponses();
+
+    $optionValueValue = NULL;
+    foreach (CallResponses::$responses as $responses) {
+      if ($responses['name'] == $responseOptionValueName) {
+        $optionValueValue = $responses['value'];
+      }
+    }
+
+    return $optionValueValue;
+  }
+
+  /**
+   * @param $responseOptionValueValue
+   * @return array|null
+   */
+  public static function getResponseByValue($responseOptionValueValue) {
+    CallResponses::setResponses();
+
+    foreach (CallResponses::$responses as $response) {
+      if ($response['value'] == $responseOptionValueValue) {
+        return $response;
+      }
+    }
+
+    return null;
+  }
+
   public static function isValidResponseName($responseName) {
     CallResponses::setResponses();
 
@@ -36,23 +69,29 @@ class CallResponses {
 
   public static function getResponseOptions($neededResponseNames = []) {
     CallResponses::setResponses();
-    $options = [];
+    $select2Options = [];
 
     if (!is_array($neededResponseNames) || empty($neededResponseNames)) {
       foreach (CallResponses::$responses as $response) {
-        $options[$response['id']] = $response['label'];
+        $select2Options[] = [
+          'id' => $response['value'],
+          'text' => $response['label'],
+        ];
       }
 
-      return $options;
+      return $select2Options;
     }
 
     foreach ($neededResponseNames as $responseName) {
       if (!empty(CallResponses::$responses[$responseName])) {
-        $options[CallResponses::$responses[$responseName]['id']] = CallResponses::$responses[$responseName]['label'];
+        $select2Options[] = [
+          'id' => CallResponses::$responses[$responseName]['value'],
+          'text' => CallResponses::$responses[$responseName]['label'],
+        ];
       }
     }
 
-    return $options;
+    return $select2Options;
   }
 
   private static function setResponses() {

@@ -44,6 +44,26 @@ class CallCenterConfiguration {
       ];
     }
 
+    if (isset($configurationJson['finalResponseOptionDefault'])) {
+      $preparedConfiguration['finalResponse']['defaultResponseName'] = $this->prepareDefaultResponseName(
+        $configurationJson['finalResponseOptionDefault'],
+        'finalResponseOptionDefault',
+        $preparedConfiguration['finalResponse']['names']
+      );
+    } else {
+      $preparedConfiguration['finalResponse']['defaultResponseName'] = null;
+    }
+
+    if (isset($configurationJson['preliminaryResponseOptionDefault'])) {
+      $preparedConfiguration['preliminaryResponse']['defaultResponseName'] = $this->prepareDefaultResponseName(
+        $configurationJson['preliminaryResponseOptionDefault'],
+        'preliminaryResponseOptionDefault',
+        $preparedConfiguration['preliminaryResponse']['names']
+      );
+    } else {
+      $preparedConfiguration['preliminaryResponse']['defaultResponseName'] = null;
+    }
+
     if (!empty($configurationJson['scheduleOffsets'])) {
       $preparedConfiguration['scheduleOffsets'] = $this->prepareScheduleOffsets($configurationJson['scheduleOffsets']);
     } else {
@@ -236,6 +256,24 @@ class CallCenterConfiguration {
     ];
   }
 
+  private function prepareDefaultResponseName($fieldValue, $fieldName, $availableResponseNames) {
+    if (!empty($fieldValue) && is_string($fieldValue)) {
+      if (CallResponses::isValidResponseName($fieldValue)) {
+        if (in_array($fieldValue, $availableResponseNames) || in_array('*', $availableResponseNames)) {
+          return $fieldValue;
+        } else {
+          $this->setWarningMessage('Not valid value of "' . $fieldName . '": "' . $fieldValue . '". This value is not allow. Add this response name to available response names.');
+        }
+      } else {
+        $this->setWarningMessage('Not valid value of "' . $fieldName . '": "' . $fieldValue . '".');
+      }
+    } else {
+      $this->setWarningMessage('Not valid value of "' . $fieldName . '".');
+    }
+
+    return null;
+  }
+
   public function isHasErrors() {
     return !empty($this->errorMessages);
   }
@@ -275,12 +313,7 @@ class CallCenterConfiguration {
     return $this->configuration['isShowTimer'];
   }
 
-  /**
-   * Get Available Final Response OptionValue Names
-   * *
-   * * @return array
-   */
-  public function getAvailableResponseOptionValueNames() {
+  public function getFinalResponseNames() {
     return $this->configuration['finalResponse']['names'];
   }
 
@@ -288,13 +321,16 @@ class CallCenterConfiguration {
     return $this->configuration['finalResponse']['options'];
   }
 
-  /**
-   * Get Available Preliminary Response OptionValue Names
-   *
-   * @return array
-   */
+  public function getFinalResponseDefaultResponseName() {
+    return $this->configuration['finalResponse']['defaultResponseName'];
+  }
+
   public function getPreliminaryResponseNames() {
     return $this->configuration['preliminaryResponse']['names'];
+  }
+
+  public function getPreliminaryResponseDefaultResponseName() {
+    return $this->configuration['preliminaryResponse']['defaultResponseName'];
   }
 
   public function getPreliminaryResponseOptions() {

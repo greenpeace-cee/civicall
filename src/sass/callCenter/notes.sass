@@ -1,0 +1,91 @@
+$notesIconHeight: 12px
+
+.notes__auto-save-status
+  width: $notesIconHeight
+  height: $notesIconHeight
+  overflow: hidden
+  position: relative
+  display: flex
+  align-items: center
+  justify-content: center
+  &.notes--saved
+    .notes__status-icon-saved
+      transition: 1s linear opacity
+      opacity: 1
+      z-index: 10
+    .notes__status-icon-loading
+      opacity: 0
+      transition: 0s
+      z-index: 1
+    .notes__status-icon-unsaved
+      opacity: 0
+      transition: 0s
+      z-index: 1
+
+  &.notes--unsaved
+    .notes__status-icon-saved
+      opacity: 0
+      transition: 0s
+      z-index: 1
+    .notes__status-icon-loading
+      opacity: 0
+      transition: 0s
+      z-index: 1
+    .notes__status-icon-unsaved
+      opacity: 1
+      transition: 1s ease-out opacity
+      z-index: 10
+
+  &.notes--loading
+    .notes__status-icon-saved
+      opacity: 0
+      transition: 0s
+      z-index: 1
+    .notes__status-icon-loading
+      opacity: 1
+      transition: 1s ease-out opacity, transform
+      animation: notesLoading 1s ease-out infinite
+      z-index: 10
+    .notes__status-icon-unsaved
+      opacity: 0
+      transition: 0s
+      z-index: 1
+
+.notes__header
+  display: flex
+  gap: 5px
+  align-items: center
+  padding-bottom: 10px
+
+.notes__textarea-wrap
+  max-width: 600px
+
+.notes__title
+  font-size: 16px
+  font-weight: 600
+
+.notes__wrap
+  padding-bottom: 20px
+  border-bottom: 1px solid $gray
+
+@keyframes notesLoading
+  from
+    opacity: 1
+  to
+    opacity: 0.2
+
+.notes__status-icon
+  position: absolute
+  width: $notesIconHeight
+  height: $notesIconHeight
+  display: flex
+  align-items: center
+  justify-content: center
+  opacity: 0
+  font-size: $notesIconHeight
+  color: #282828
+  z-index: 1
+  &.notes__status-icon-unsaved
+    width: $notesIconHeight - 4px
+    height: $notesIconHeight - 4px
+    font-size: $notesIconHeight - 4px

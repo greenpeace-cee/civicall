@@ -3,8 +3,8 @@
 // https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_entityTypes
 return [
   [
-    'name' => 'CallLogs',
-    'class' => 'CRM_Civicall_DAO_CallLogs',
-    'table' => 'civicrm_call_logs',
+    'name' => 'CallLog',
+    'class' => 'CRM_Civicall_DAO_CallLog',
+    'table' => 'civicrm_call_log',
   ],
 ];

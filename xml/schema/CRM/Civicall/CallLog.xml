@@ -2,16 +2,16 @@
 
 <table>
   <base>CRM/Civicall</base>
-  <class>CallLogs</class>
-  <name>civicrm_call_logs</name>
-  <comment>Call logs</comment>
+  <class>CallLog</class>
+  <name>civicrm_call_log</name>
+  <comment>Call log</comment>
   <log>true</log>
 
   <field>
     <name>id</name>
     <type>int unsigned</type>
     <required>true</required>
-    <comment>Unique CallLogs ID</comment>
+    <comment>Unique CallLog ID</comment>
   </field>
   <primaryKey>
     <name>id</name>
@@ -46,17 +46,36 @@
   </field>
 
   <field>
-    <name>created_by_contact_id</name>
+    <name>created_id</name>
     <type>int unsigned</type>
+    <title>Created By Contact ID</title>
     <comment>Created by contact, FK to Contact</comment>
-    <required>true</required>
+    <html>
+      <label>Created By</label>
+    </html>
   </field>
+  <foreignKey>
+    <name>created_id</name>
+    <table>civicrm_contact</table>
+    <key>id</key>
+    <onDelete>SET NULL</onDelete>
+  </foreignKey>
 
   <field>
-    <name>call_response_option_value_id</name>
+    <name>call_response_id</name>
     <type>int unsigned</type>
-    <comment>Call response, FK to OptionValue</comment>
+    <uniqueName>call_response_id</uniqueName>
     <required>true</required>
+    <import>true</import>
+    <export>true</export>
+    <title>Call response id</title>
+    <comment>Call response, FK to OptionValue</comment>
+    <pseudoconstant>
+      <optionGroupName>response</optionGroupName>
+    </pseudoconstant>
+    <html>
+      <type>Select</type>
+    </html>
   </field>
 
 </table>

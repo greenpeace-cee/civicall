@@ -2,12 +2,12 @@
 namespace Civi\Api4;
 
 /**
- * CallLogs entity.
+ * CallLog entity.
  *
  * Provided by the Civicall extension.
  *
  * @package Civi\Api4
  */
-class CallLogs extends Generic\DAOEntity {
+class CallLog extends Generic\DAOEntity {
 
 }

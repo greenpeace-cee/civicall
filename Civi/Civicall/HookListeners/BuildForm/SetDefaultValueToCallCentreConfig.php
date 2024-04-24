@@ -4,7 +4,6 @@ namespace Civi\Civicall\HookListeners\BuildForm;
 
 use Civi\Civicall\Utils\CivicallSettings;
 use Civi\Core\Event\GenericHookEvent;
-use CRM_Civicall_ExtensionUtil;
 use CRM_Custom_Form_CustomDataByType;
 
 class SetDefaultValueToCallCentreConfig {

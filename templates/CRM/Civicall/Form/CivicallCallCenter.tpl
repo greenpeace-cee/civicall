@@ -76,7 +76,7 @@
     <div class="call-center__dynamic-block-wrap">
       {foreach from=$pageLoaderConfiguration item=loader}
         <div class="call-center__dynamic-block-item">
-          <div class="civicall__accordion crm-accordion-wrapper {if !$loader.isCollapsed} collapsed {/if}">
+          <div class="civicall__accordion crm-accordion-wrapper {if $loader.isCollapsed} collapsed {/if}">
             <div class="crm-accordion-header crm-master-accordion-header">{$loader.title}</div>
             <div class="crm-accordion-body">
               <div class="call-center__dynamic-block">
@@ -95,12 +95,7 @@
       <div class="crm-accordion-body">
         <div class="call-center__call-results-block">
 
-          <div class="call-center__notes-wrap">
-            <div class="call-center__sub-title">Notes</div>
-            <div class="call-center__notes-textarea-wrap">
-              {$form.notes.html}
-            </div>
-          </div>
+          {include file="CRM/Civicall/Chanks/CallCenterNotes.tpl"}
 
           {if $isCallAlreadyClosed && !empty($alreadyClosedCallMessage)}
             <div class="call-center__already-closed-call-message-wrap">
@@ -231,7 +226,6 @@
           </div>
 
           {$form.start_call_time_timestamp.html}
-          {$form.current_activity_id.html}
 
           <div class="call-center__buttons-wrap">
             <div class="crm-submit-buttons">
@@ -271,17 +265,8 @@
         }
 
         const startTimeMilliseconds = Date.now();
-        let iteration = 0;
 
-        const intervalId = setInterval(function () {
-          // Clears interval when popup with this page is closed.
-          // It checks every 50 iteration if exist timer element.
-          if (iteration % 50) {
-            if ($('#callCenterCurrentCallTimer').length === 0) {
-              clearInterval(intervalId);
-            }
-          }
-
+        civicallSetInterval('#callCenterCurrentCallTimer', function () {
           let elapsedTimeMilliseconds = Date.now() - startTimeMilliseconds;
           let elapsedTimeSeconds = (elapsedTimeMilliseconds / 1000).toFixed(0);
           let minutes = parseInt((elapsedTimeSeconds / 60).toFixed(0));
@@ -294,8 +279,25 @@
 
           message += seconds + ' second' + ((seconds === 1) ? '' : 's');
           timerElement.text(message);
+        }, 200, 50);
+      }
+
+      // Wrap for setInterval loop
+      // Clears interval when popup with this page is closed.
+      // It checks every some iteration if exist target element.
+      function civicallSetInterval(elementSelector, callback, interval, checkEveryIteration) {
+        if ($(elementSelector).length === 0) {
+          return;
+        }
+
+        let iteration = 0;
+        const intervalId = setInterval(function () {
+          if ((iteration % checkEveryIteration === 0) && $(elementSelector).length === 0) {
+            clearInterval(intervalId);
+          }
+          callback();
           iteration++;
-        }, 200);
+        }, interval);
       }
     });
   })(CRM, CRM.$);

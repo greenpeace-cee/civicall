@@ -35,6 +35,8 @@
   "preliminaryResponseNames": [
     "empty_response"
   ],
+  "preliminaryResponseOptionDefault": "empty_response",
+  "finalResponseOptionDefault": "empty_response",
   "responseLimit": 3,
   "isShowTimer": true
 }

@@ -95,7 +95,7 @@
                       {if !empty($activity.responseActivities)}
                           {foreach from=$activity.responseActivities item=responseActivity}
                             <div style="padding-left: 10px">
-                              <a class="crm-popup" href="{$responseActivity.link}" target="_blank">id=[{$activity.id}]</a>
+                              <a class="crm-popup" href="{$responseActivity.link}" target="_blank">id=[{$responseActivity.id}]</a>
                             </div>
                           {/foreach}
                       {else}
