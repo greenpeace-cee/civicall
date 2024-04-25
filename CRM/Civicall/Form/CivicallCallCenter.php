@@ -94,8 +94,8 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Core_Form {
     $this->add('textarea', 'notes', ts('Notes'), ['cols' => 50, 'rows' => 6, 'class' => 'civicall__input civicall--textarea civicall--width-100-percent']);
     $this->add('datepicker', 'scheduled_call_date', 'Scheduled Call Date', ['class' => 'civicall__input civicall--datepicker'], FALSE, ['minDate' => date('Y-m-d')]);
     $this->add('datepicker', 'response_call_date', 'Response Date', ['class' => 'civicall__input civicall--datepicker'], FALSE, ['minDate' => date('Y-m-d')]);
-    $this->add('hidden', 'start_call_time_timestamp', (new DateTime())->getTimestamp());
-    $this->add('hidden', 'activity_id', $this->activity['id']);
+    $this->add('text', 'start_call_time_timestamp', '');
+    $this->add('text', 'activity_id', '');
     $this->add('datepicker', 'reopen_scheduled_call_date', 'Reopen Schedule Date', ['class' => 'civicall__input civicall--datepicker'], FALSE, ['minDate' => date('Y-m-d')]);
 
     $this->add('select2', 'new_final_call_response', 'New final response', $finalResponseOptions, FALSE, [
@@ -293,6 +293,8 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Core_Form {
     $defaults['notes'] = $this->activity['details'];
     $defaults['response_call_date'] = (new DateTime())->format('Y-m-d H:i:s');
     $defaults['reopen_scheduled_call_date'] = (new DateTime())->format('Y-m-d H:i:s');
+    $defaults['start_call_time_timestamp'] = (new DateTime())->getTimestamp();
+    $defaults['activity_id'] = $this->activity['id'];
 
     $scheduleOffsets = $this->callCenterConfiguration->getScheduleOffsets();
     if (!empty($scheduleOffsets[$this->callLogsCount]['calculatedDate'])) {

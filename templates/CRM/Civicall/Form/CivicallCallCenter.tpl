@@ -225,7 +225,10 @@
             {/if}
           </div>
 
-          {$form.start_call_time_timestamp.html}
+          <div style="display: none !important;">
+            {$form.start_call_time_timestamp.html}
+            {$form.activity_id.html}
+          </div>
 
           <div class="call-center__buttons-wrap">
             <div class="crm-submit-buttons">
