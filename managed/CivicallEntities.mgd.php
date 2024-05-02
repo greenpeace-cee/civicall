@@ -101,7 +101,7 @@ return [
       'values' => [
         'name' => 'civicall_call_configuration',
         'table_name' => 'civicrm_value_call_configuration',
-        'title' => 'Call Configuration',
+        'title' => 'CiviCall Configuration',
         'extends' => 'Campaign',
         'extends_entity_column_id' => NULL,
         'extends_entity_column_value' => NULL,
@@ -223,7 +223,7 @@ return [
       'values' => [
         'custom_group_id.name' => 'civicall_call_configuration',
         'name' => 'is_call_center_enabled',
-        'label' => 'Is call center enabled?',
+        'label' => 'Is CiviCall enabled?',
         'data_type' => 'Boolean',
         'html_type' => 'Radio',
         'default_value' => '0',

@@ -127,15 +127,18 @@ class CivicallUtils {
     }
 
     $phones = \Civi\Api4\Phone::get()
-      ->addSelect('label', 'phone_numeric', 'is_primary', 'location_type_id:label')
+      ->addSelect('label', 'phone', 'phone_numeric', 'is_primary', 'location_type_id:label', 'phone_type_id:label')
       ->addWhere('contact_id', '=', $contactId)
+      ->addOrderBy('is_primary', 'DESC')
       ->execute();
 
     foreach ($phones as $phone) {
       $preparedPhones[] = [
         'id' => $phone['id'],
-        'phoneNumber' => $phone['phone_numeric'],
-        'phoneTypeLabel' => $phone['location_type_id:label'],
+        'phoneNumber' => $phone['phone'],
+        'phoneNumeric' => $phone['phone_numeric'],
+        'locationTypeLabel' => $phone['location_type_id:label'],
+        'phoneTypeLabel' => $phone['phone_type_id:label'],
         'isPrimary' => $phone['is_primary'],
       ];
     }

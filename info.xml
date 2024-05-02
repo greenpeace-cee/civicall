@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <extension key="civicall" type="module">
   <file>civicall</file>
-  <name>Civicall</name>
+  <name>CiviCall</name>
   <description>Callcenter extension for CiviCRM</description>
   <license>AGPL-3.0</license>
   <maintainer>

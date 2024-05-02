@@ -114,7 +114,7 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Core_Form {
     $this->addButtons([
       [
         'type' => 'cancel',
-        'name' => E::ts('Close call without save'),
+        'name' => E::ts('Cancel without saving'),
         'isDefault' => false,
       ],
       [

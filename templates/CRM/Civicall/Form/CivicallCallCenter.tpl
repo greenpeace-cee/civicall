@@ -10,7 +10,7 @@
     <ul class="call-center__contact-info-phones">
       {foreach from=$targetContact.phones item=phone}
         <li class="call-center__contact-info-phone">
-          <span>{$phone.phoneNumber}</span>
+          <span><a href="tel:{$phone.phoneNumeric}">{$phone.phoneNumber}</a></span>
           <span>({$phone.phoneTypeLabel})</span>
           {if ($phone.isPrimary)}
             <span>*</span>
@@ -53,7 +53,7 @@
     <div class="call-center__sub-title">Current call</div>
     <div class="call-center__current-call-timer-wrap">
       <div class="call-center__current-call-timer">
-        <span>Time left:</span>
+        <span>Time:</span>
         <span id="callCenterCurrentCallTimer"></span>
       </div>
     </div>
@@ -62,7 +62,7 @@
   {if (!empty($activity.campaignScript))}
     <div class="call-center__call-scripts-wrap">
       <div class="civicall__accordion crm-accordion-wrapper collapsed">
-        <div class="crm-accordion-header crm-master-accordion-header">Call Scripts</div>
+        <div class="crm-accordion-header crm-master-accordion-header">Call Script</div>
         <div class="crm-accordion-body">
           <div class="call-center__call-scripts">
             {$activity.campaignScript}
@@ -234,7 +234,7 @@
             <div class="crm-submit-buttons">
               <button class="civicall__button civicall--red civicall--height-big crm-form-submit cancel crm-button crm-button-type-cancel crm-button{$cancelButtonName}" value="1" type="submit" name="{$cancelButtonName}" id="{$cancelButtonName}-bottom">
                 <i aria-hidden="true" class="crm-i fa-window-close"></i>
-                <span>Close call without save</span>
+                <span>Cancel without saving</span>
               </button>
             </div>
           </div>
