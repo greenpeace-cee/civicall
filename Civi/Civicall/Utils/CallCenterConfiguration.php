@@ -124,10 +124,19 @@ class CallCenterConfiguration {
         $this->setWarningMessage('Afform Module "'.  $pageConfig['afformModuleName'] . '" doesn\'t exist.');
       }
 
+      $afformModuleParams = [];
+      if (!empty($pageConfig['afformModuleParams']) && is_array($pageConfig['afformModuleParams'])) {
+        foreach ($pageConfig['afformModuleParams']  as $paramName => $paramValue) {
+          if (is_string($paramName) && (is_string($paramValue) || is_numeric($paramValue))) {
+            $afformModuleParams[$paramName] = $paramValue;
+          }
+        }
+      }
+
       $preparedPageLoader[] = [
         'title' => $pageConfig['title'],
         'afformModuleName' => $pageConfig['afformModuleName'],
-        'afformModuleParams' => [],// TODO: Do we need set afformModuleParams by configuration json?
+        'afformModuleParams' => $afformModuleParams,
         'isCollapsed' => $isCollapsed,
         'afformModuleHtml' => "AfformModule " . $pageConfig['afformModuleName'] . " is doesn't load!",
       ];
@@ -139,25 +148,30 @@ class CallCenterConfiguration {
   /**
    * Loads afform modules scripts and render template for it
    *
-   * @param $afformModuleParams
+   * @param $dynamicAfformModuleParams
    * @return void
    */
-  public function loadAfformModules($defaultAfformModuleParams, $afformModuleParams = []) {
+  public function loadAfformModules($dynamicAfformModuleParams) {
+    $validateDynamicAfformModuleParams = [];
+    if (!empty($dynamicAfformModuleParams) && is_array($dynamicAfformModuleParams)) {
+      foreach ($dynamicAfformModuleParams as $dynamicParamName => $dynamicParamValue) {
+        if ((is_string($dynamicParamValue) || is_numeric($dynamicParamValue))) {
+          $validateDynamicAfformModuleParams[$dynamicParamName] = $dynamicParamValue;
+        }
+      }
+    }
+
     foreach ($this->configuration['pageLoader'] as $key => $loader) {
-      if (!empty($afformModuleParams[$loader['afformModuleName']])) {
-        $afformModuleParams = $afformModuleParams[$loader['afformModuleName']];
-      } elseif (!empty($loader['afformModuleParams'])) {
-        $afformModuleParams = $loader['afformModuleParams'];
-      } elseif (!empty($defaultAfformModuleParams)) {
-        $afformModuleParams = $defaultAfformModuleParams;
-      } else {
-        $afformModuleParams = [];
+      $finalAfformModuleParams = $validateDynamicAfformModuleParams;
+      foreach ($loader['afformModuleParams'] as $paramName => $paramValue) {
+        $finalAfformModuleParams[$paramName] = $paramValue;
       }
 
-      $afformLoader = new AfformLoader($loader['afformModuleName'], $afformModuleParams);
+      $afformLoader = new AfformLoader($loader['afformModuleName'], $finalAfformModuleParams);
       $afformTemplateHtml = $afformLoader->getTemplate();
       $afformLoader->loadAngularjsModule();
 
+      $this->configuration['pageLoader'][$key]['afformModuleParams'] = $finalAfformModuleParams;
       $this->configuration['pageLoader'][$key]['afformModuleHtml'] = $afformTemplateHtml;
     }
   }

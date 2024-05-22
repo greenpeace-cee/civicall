@@ -2,13 +2,13 @@
   "pageLoader": [
     {
       "afformModuleName" : "testAfformModuleName",
-      "isCollapsed" : "false",
       "title": "Example dynamic content"
     },
     {
       "afformModuleName" : "superTestAfformModuleName",
       "isCollapsed" : "true",
-      "title": "Another example dynamic content"
+      "title": "Another example dynamic content",
+      "afformModuleParams": {"case_id": 4, "address_id": 8}
     }
   ],
   "scheduleOffsets": [
