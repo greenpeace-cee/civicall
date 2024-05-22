@@ -63,7 +63,11 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Core_Form {
 
     $this->isCallAlreadyClosed = CivicallUtils::isCallAlreadyClosed($this->activity['id']);
     $this->callLogsCount = CallLogsUtils::getActivityCallLogsCount($this->activity['id']);
-    $this->callCenterConfiguration->loadAfformModules(['contact_id' => $this->targetContact['id']]);
+    $this->callCenterConfiguration->loadAfformModules([
+      'contact_id' => $this->targetContact['id'],
+      'activity_id' => $this->targetContact['id'],
+      'campaign_id' => $this->targetCampaign['id'],
+    ]);
 
     $this->assign('responseLimitMessage', CivicallSettings::getResponseLimitMessage($this->callCenterConfiguration->getResponseLimit(), $this->callLogsCount));
     $this->assign('pageLoaderConfiguration', $this->callCenterConfiguration->getPageLoader());
