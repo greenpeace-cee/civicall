@@ -317,14 +317,14 @@ return [
     ],
   ],
   [
-    'name' => 'CustomGroup_civicall_call_details',
+    'name' => 'CustomGroup_activity_tmresponses',
     'entity' => 'CustomGroup',
     'cleanup' => 'never',
     'update' => 'always',
     'params' => [
       'version' => 4,
       'values' => [
-        'name' => 'civicall_call_details',
+        'name' => 'activity_tmresponses',
         'table_name' => 'civicrm_value_activity_tmresponses',
         'title' => 'Call details',
         'extends' => 'Activity',
@@ -353,14 +353,14 @@ return [
     ],
   ],
   [
-    'name' => 'CustomGroup_civicall_call_details_CustomField_civicall_schedule_date',
+    'name' => 'CustomGroup_activity_tmresponses_CustomField_civicall_schedule_date',
     'entity' => 'CustomField',
     'cleanup' => 'never',
     'update' => 'always',
     'params' => [
       'version' => 4,
       'values' => [
-        'custom_group_id.name' => 'civicall_call_details',
+        'custom_group_id.name' => 'activity_tmresponses',
         'name' => 'civicall_schedule_date',
         'label' => 'Schedule Date',
         'data_type' => 'Date',
@@ -397,15 +397,15 @@ return [
     ],
   ],
   [
-    'name' => 'CustomGroup_civicall_call_details_CustomField_civicall_response_counter',
+    'name' => 'CustomGroup_activity_tmresponses_CustomField_response_counter',
     'entity' => 'CustomField',
     'cleanup' => 'never',
     'update' => 'always',
     'params' => [
       'version' => 4,
       'values' => [
-        'custom_group_id.name' => 'civicall_call_details',
-        'name' => 'civicall_response_counter',
+        'custom_group_id.name' => 'activity_tmresponses',
+        'name' => 'response_counter',
         'label' => 'Response Counter',
         'data_type' => 'Int',
         'html_type' => 'Text',
@@ -441,15 +441,15 @@ return [
     ],
   ],
   [
-    'name' => 'CustomGroup_civicall_call_details_CustomField_civicall_call_final_response',
+    'name' => 'CustomGroup_activity_tmresponses_CustomField_response',
     'entity' => 'CustomField',
     'cleanup' => 'never',
     'update' => 'always',
     'params' => [
       'version' => 4,
       'values' => [
-        'custom_group_id.name' => 'civicall_call_details',
-        'name' => 'civicall_call_final_response',
+        'custom_group_id.name' => 'activity_tmresponses',
+        'name' => 'response',
         'label' => 'Final response',
         'data_type' => 'String',
         'html_type' => 'Select',
@@ -485,15 +485,15 @@ return [
     ],
   ],
   [
-    'name' => 'CustomGroup_civicall_call_details_CustomField_final_response_date',
+    'name' => 'CustomGroup_activity_tmresponses_CustomField_response_date',
     'entity' => 'CustomField',
     'cleanup' => 'never',
     'update' => 'always',
     'params' => [
       'version' => 4,
       'values' => [
-        'custom_group_id.name' => 'civicall_call_details',
-        'name' => 'final_response_date',
+        'custom_group_id.name' => 'activity_tmresponses',
+        'name' => 'response_date',
         'label' => 'Final response date',
         'data_type' => 'Date',
         'html_type' => 'Select Date',

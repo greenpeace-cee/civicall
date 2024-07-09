@@ -212,12 +212,12 @@ class CivicallUtils {
 
   public static function isCallAlreadyClosed($activityId) {
     $activity = Activity::get()
-      ->addSelect(  'status_id:name', 'civicall_call_details.civicall_call_final_response')
+      ->addSelect(  'status_id:name', 'activity_tmresponses.response')
       ->addWhere('id', '=', $activityId)
       ->execute()
       ->first();
 
-    if (!empty($activity['civicall_call_details.civicall_call_final_response'])) {
+    if (!empty($activity['activity_tmresponses.response'])) {
       return true;
     }
 

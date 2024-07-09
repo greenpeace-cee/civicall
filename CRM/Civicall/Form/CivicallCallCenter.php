@@ -161,12 +161,12 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Core_Form {
     Activity::update()
       ->addWhere('id', '=', $this->activity['id'])
       ->addValue('status_id:name', 'Scheduled')
-      ->addValue('civicall_call_details.final_response_date', null)
-      ->addValue('civicall_call_details.civicall_call_final_response', null)
+      ->addValue('activity_tmresponses.response_date', null)
+      ->addValue('activity_tmresponses.response', null)
       ->addValue('details', $values['notes'])
       ->addValue('activity_date_time', $values['reopen_scheduled_call_date'])
-      ->addValue('civicall_call_details.civicall_response_counter', $callLogsCount)
-      ->addValue('civicall_call_details.civicall_schedule_date', $values['reopen_scheduled_call_date'])
+      ->addValue('activity_tmresponses.response_counter', $callLogsCount)
+      ->addValue('activity_tmresponses.civicall_schedule_date', $values['reopen_scheduled_call_date'])
       ->execute();
   }
 
@@ -181,7 +181,7 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Core_Form {
     Activity::update()
       ->addWhere('id', '=', $this->activity['id'])
       ->addValue('status_id:name', 'Scheduled')
-      ->addValue('civicall_call_details.civicall_call_final_response', $values['new_final_call_response'])
+      ->addValue('activity_tmresponses.response', $values['new_final_call_response'])
       ->addValue('details', $values['notes'])
       ->execute();
   }
@@ -203,9 +203,9 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Core_Form {
       ->addWhere('id', '=', $this->activity['id'])
       ->addValue('activity_date_time', $values['scheduled_call_date'])
       ->addValue('status_id:name', 'Scheduled')
-      ->addValue('civicall_call_details.civicall_schedule_date', $values['scheduled_call_date'])
+      ->addValue('activity_tmresponses.civicall_schedule_date', $values['scheduled_call_date'])
       ->addValue('details', $values['notes'])
-      ->addValue('civicall_call_details.civicall_response_counter', $callLogsCount)
+      ->addValue('activity_tmresponses.response_counter', $callLogsCount)
       ->execute();
 
     CRM_Core_Session::setStatus(E::ts("Call is rescheduled!"), E::ts('Success'), 'success');
@@ -227,10 +227,10 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Core_Form {
     Activity::update()
       ->addWhere('id', '=', $this->activity['id'])
       ->addValue('status_id:name', 'Completed')
-      ->addValue('civicall_call_details.final_response_date', $values['response_call_date'])
-      ->addValue('civicall_call_details.civicall_call_final_response', $values['final_call_response'])
+      ->addValue('activity_tmresponses.response_date', $values['response_call_date'])
+      ->addValue('activity_tmresponses.response', $values['final_call_response'])
       ->addValue('details', $values['notes'])
-      ->addValue('civicall_call_details.civicall_response_counter', $callLogsCount)
+      ->addValue('activity_tmresponses.response_counter', $callLogsCount)
       ->execute();
 
     $finalCallResponse = CallResponses::getResponseByValue($values['final_call_response']);
