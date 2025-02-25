@@ -1,0 +1,125 @@
+.call-center__wrap
+  &.call-center__popup-from
+    .call-center__action-wrap:last-child
+      border-bottom: none
+
+    .call-center__buttons-wrap
+      display: none
+
+.call-center__form-title
+  font-size: 24px
+  padding-bottom: 20px
+  border-bottom: 1px solid $gray
+
+.call-center__contact-info-wrap
+  padding-top: 10px
+  padding-bottom: 10px
+  border-bottom: 1px solid $gray
+
+.call-center__contact-info-phones
+  display: flex
+  gap: 10px
+  list-style: none
+  padding: 0 !important
+
+.call-center__call-scripts-wrap
+  margin-bottom: 5px
+
+.call-center__dynamic-block-wrap
+
+.call-center__dynamic-block-item
+  margin-bottom: 5px
+
+.call-center__call-logs-wrap
+  padding-bottom: 10px
+  padding-top: 20px
+
+.call-center__current-call-wrap
+  padding-bottom: 20px
+  padding-top: 10px
+
+.call-center__current-call-timer-wrap
+  height: 20px
+  overflow: hidden
+  display: flex
+  align-items: center
+
+.call-center__current-call-timer
+  line-height: 20px
+  overflow: hidden
+  text-overflow: ellipsis
+  white-space: nowrap
+
+.call-center__call-logs-table-wrap
+  max-width: 600px
+
+.call-center__sub-title
+  font-size: 16px
+  padding-bottom: 10px
+  font-weight: 600
+
+.call-center__action-wrap
+  padding-top: 20px
+  padding-bottom: 20px
+  border-bottom: 1px solid $gray
+
+.call-center__buttons-wrap
+  padding-top: 40px
+  .crm-submit-buttons
+      display: flex
+      gap: 10px
+      align-items: center
+      padding: 0
+      & > button
+        margin: 0 !important
+
+
+.call-center__dynamic-block, .call-center__call-scripts, .call-center__call-results-block
+  padding-top: 10px
+  padding-bottom: 5px
+  padding-left: 10px
+  padding-right: 10px
+
+.call-center__action-row
+  display: flex
+  gap: 10px
+  align-items: flex-end
+  justify-content: start
+
+.call-center__message-wrap
+  padding-top: 5px
+  max-width: 600px
+
+.call-center__action-row-item-title
+  padding-bottom: 7px
+
+.ui-dialog-buttonpane > .ui-dialog-buttonset > button[data-identifier="_qf_CivicallCallCenter_cancel"]
+  cursor: pointer
+  box-sizing: border-box !important
+  display: flex !important
+  font-family: "Open Sans","Helvetica Neue",Helvetica,Arial,sans-serif
+  border: none !important
+  align-items: center
+  justify-content: center
+  gap: 7px
+  transition: 0.3s
+  color: white !important
+  background: $red !important
+  &:hover
+    background: $redDarken !important
+  & > .ui-icon
+    display: flex
+    align-items: center
+    justify-content: center
+    margin: 0 !important
+    padding: 0 !important
+    width: 100% !important
+    height: 100% !important
+
+.call-center__already-closed-call-message-wrap
+  padding-bottom: 20px
+  border-bottom: 1px solid $gray
+  padding-top: 10px
+
+.call-center__already-closed-call-message
+  max-width: 600px

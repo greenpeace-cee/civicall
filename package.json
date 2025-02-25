@@ -1,0 +1,23 @@
+{
+  "name": "civicall",
+  "version": "1.0.0",
+  "description": "Compiles Sass and js via Webpack",
+  "main": "main.js",
+  "scripts": {
+    "watch": "npx webpack --mode development",
+    "build": "npx webpack --mode production"
+  },
+  "keywords": [],
+  "devDependencies": {
+    "@babel/core": "^7.16.0",
+    "@babel/preset-env": "^7.16.0",
+    "babel-loader": "^8.2.3",
+    "css-loader": "^6.5.1",
+    "file-loader": "^6.2.0",
+    "node-sass": "^6.0.1",
+    "sass-loader": "^12.3.0",
+    "style-loader": "^3.3.1",
+    "webpack": "^5.64.0",
+    "webpack-cli": "^4.9.1"
+  }
+}

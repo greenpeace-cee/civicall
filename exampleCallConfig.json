@@ -1,0 +1,42 @@
+{
+  "pageLoader": [
+    {
+      "afformModuleName" : "testAfformModuleName",
+      "title": "Example dynamic content"
+    },
+    {
+      "afformModuleName" : "superTestAfformModuleName",
+      "isCollapsed" : "true",
+      "title": "Another example dynamic content",
+      "afformModuleParams": {"case_id": 4, "address_id": 8}
+    }
+  ],
+  "scheduleOffsets": [
+    {
+      "callNumber" : 0,
+      "dateModify" : "+1 day"
+    },
+    {
+      "callNumber" : 1,
+      "dateModify" : "+3 days"
+    },
+    {
+      "callNumber" : 2,
+      "dateModify" : "+4 days"
+    },
+    {
+      "callNumber" : 3,
+      "dateModify" : "+10 days"
+    }
+  ],
+  "finalResponseNames": [
+    "empty_response"
+  ],
+  "preliminaryResponseNames": [
+    "empty_response"
+  ],
+  "preliminaryResponseOptionDefault": "empty_response",
+  "finalResponseOptionDefault": "empty_response",
+  "responseLimit": 3,
+  "isShowTimer": true
+}

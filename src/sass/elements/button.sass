@@ -1,0 +1,130 @@
+.civicall__button
+  cursor: pointer
+  box-sizing: border-box !important
+  display: flex !important
+  background: $blue
+  color: #fff
+  font-family: "Open Sans","Helvetica Neue",Helvetica,Arial,sans-serif
+  border: none !important
+  align-items: center
+  justify-content: center
+  gap: 7px
+  transition: 0.3s
+  float: none !important
+  text-shadow: none !important
+  margin: 0 !important
+  line-height: 20px !important
+  text-transform: uppercase
+
+.civicall__button.civicall--blue
+  color: white !important
+  background: $blue !important
+
+.civicall__button.civicall--blue:hover
+  background: $blueDarken !important
+
+.civicall__button.civicall--red
+  color: white !important
+  background: $red !important
+
+.civicall__button.civicall--red:hover
+  background: $redDarken !important
+
+.civicall__button.civicall--green
+  color: white !important
+  background: $green !important
+
+.civicall__button.civicall--green:hover
+  background: $greenDarken !important
+
+.civicall__button > .ui-button-icon
+  margin: 0 !important
+  padding-top: 1px
+
+.civicall__button.civicall--height-medium
+  padding: 5px 12px !important
+
+.civicall__button.civicall--height-medium.civicall--cancel
+  padding: 4px 11px !important
+
+.civicall__button.civicall--height-big
+  padding: 11px 12px !important
+
+.civicall__button.civicall--height-big.civicall--cancel
+  padding: 10px 11px !important
+
+.civicall__button.civicall--height-little
+  padding: 2px 5px !important
+
+.civicall__button.civicall--height-little.civicall--cancel
+  padding: 1px 4px !important
+
+.civicall__button[disabled="disabled"]
+  background: $gray !important
+
+.civicall__button[disabled="disabled"].civicall--cancel
+  color: white !important
+  border-color: $gray
+
+.civicall__button.civicall--bg-white-bordered
+  background: #ffffff
+  border: solid 1px $gray !important
+  color: #464354 !important
+  cursor: pointer
+  border-radius: 0
+
+.civicall__button.civicall--bg-white-bordered:hover
+  background: #f3f6f7
+
+.civicall__button.civicall--cancel
+  background: #fff !important
+  border: solid 1px #4d4d69 !important
+  color: #363342 !important
+  cursor: pointer
+
+.civicall__button.civicall--cancel:hover
+  background: #f3f6f7 !important
+
+.civicall__button.civicall--icon
+  width: 35px
+  height: 35px
+  padding: 0
+  margin: 0
+  display: flex !important
+  align-items: center
+  justify-content: center
+  font-size: 18px
+  border-radius: 50% !important
+  transition: background 0.5s
+  background: white
+
+.civicall__button.civicall--icon.civicall--disabled:hover,
+.civicall__button.civicall--icon.civicall--disabled
+  color: #7c8388
+
+.civicall__button.civicall--icon.civicall--disabled:hover
+  color: #7c8388
+
+.civicall__button.civicall--icon.civicall--disabled:hover
+  background: white
+
+.civicall__button.civicall--icon:hover
+  background: #f3f6f7
+
+.civicall__button.civicall--icon.civicall--active
+  background: #f3f6f7
+
+.civicall__button.civicall--icon > .ui-icon
+  display: flex
+  align-items: center
+  justify-content: center
+  margin: 0 !important
+  padding: 0 !important
+  width: 100% !important
+  height: 100% !important
+
+.civicall__button > i
+  display: flex !important
+  align-items: center
+  justify-content: center
+

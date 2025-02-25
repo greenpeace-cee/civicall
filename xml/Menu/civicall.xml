@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<menu>
+  <item>
+    <path>civicrm/civicall/dashboard</path>
+    <page_callback>CRM_Civicall_Form_CivicallDashboard</page_callback>
+    <title>CivicallDashboard</title>
+    <access_arguments>access CiviCRM</access_arguments>
+  </item>
+  <item>
+    <path>civicrm/civicall/call-center</path>
+    <page_callback>CRM_Civicall_Form_CivicallCallCenter</page_callback>
+    <title>CivicallCallCenter</title>
+    <access_arguments>access CiviCRM</access_arguments>
+  </item>
+  <item>
+    <path>civicrm/civicall/error</path>
+    <page_callback>CRM_Civicall_Page_CivicallError</page_callback>
+    <title>CivicallError</title>
+    <access_arguments>access CiviCRM</access_arguments>
+  </item>
+</menu>

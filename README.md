@@ -11,3 +11,7 @@ This is an [extension for CiviCRM](https://docs.civicrm.org/sysadmin/en/latest/c
 ## Known Issues
 
 (* FIXME *)
+
+### Frontend
+- dev build: npm run watch
+- prod build: npm run build

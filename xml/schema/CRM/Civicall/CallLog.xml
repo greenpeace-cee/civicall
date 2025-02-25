@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+
+<table>
+  <base>CRM/Civicall</base>
+  <class>CallLog</class>
+  <name>civicrm_call_log</name>
+  <comment>Call log</comment>
+  <log>true</log>
+
+  <field>
+    <name>id</name>
+    <type>int unsigned</type>
+    <required>true</required>
+    <comment>Unique CallLog ID</comment>
+  </field>
+  <primaryKey>
+    <name>id</name>
+    <autoincrement>true</autoincrement>
+  </primaryKey>
+
+  <field>
+    <name>activity_id</name>
+    <type>int unsigned</type>
+    <comment>FK to Activity</comment>
+    <required>true</required>
+  </field>
+  <foreignKey>
+    <name>activity_id</name>
+    <table>civicrm_activity</table>
+    <key>id</key>
+    <onDelete>CASCADE</onDelete>
+  </foreignKey>
+
+  <field>
+    <name>call_start_date</name>
+    <type>datetime</type>
+    <comment>Call start date</comment>
+    <required>true</required>
+  </field>
+
+  <field>
+    <name>call_end_date</name>
+    <type>datetime</type>
+    <comment>Call end date</comment>
+    <required>true</required>
+  </field>
+
+  <field>
+    <name>created_id</name>
+    <type>int unsigned</type>
+    <title>Created By Contact ID</title>
+    <comment>Created by contact, FK to Contact</comment>
+    <html>
+      <label>Created By</label>
+    </html>
+  </field>
+  <foreignKey>
+    <name>created_id</name>
+    <table>civicrm_contact</table>
+    <key>id</key>
+    <onDelete>SET NULL</onDelete>
+  </foreignKey>
+
+  <field>
+    <name>call_response_id</name>
+    <type>int unsigned</type>
+    <uniqueName>call_response_id</uniqueName>
+    <required>true</required>
+    <import>true</import>
+    <export>true</export>
+    <title>Call response id</title>
+    <comment>Call response, FK to OptionValue</comment>
+    <pseudoconstant>
+      <optionGroupName>response</optionGroupName>
+    </pseudoconstant>
+    <html>
+      <type>Select</type>
+    </html>
+  </field>
+
+</table>

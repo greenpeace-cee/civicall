@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <extension key="civicall" type="module">
   <file>civicall</file>
-  <name>civicall</name>
+  <name>CiviCall</name>
   <description>Callcenter extension for CiviCRM</description>
   <license>AGPL-3.0</license>
   <maintainer>
@@ -20,7 +20,11 @@
   <compatibility>
     <ver>5.57</ver>
   </compatibility>
-  <comments></comments>
+  <requires>
+    <ext>org.civicrm.search_kit</ext>
+    <ext>org.civicrm.afform</ext>
+  </requires>
+  <comments/>
   <classloader>
     <psr0 prefix="CRM_" path="."/>
     <psr4 prefix="Civi\" path="Civi"/>
@@ -34,5 +38,8 @@
     <mixin>mgd-php@1.0.0</mixin>
     <mixin>setting-php@1.0.0</mixin>
     <mixin>smarty-v2@1.0.1</mixin>
+    <mixin>menu-xml@1.0.0</mixin>
+    <mixin>entity-types-php@1.0.0</mixin>
   </mixins>
+  <upgrader>CRM_Civicall_Upgrader</upgrader>
 </extension>
