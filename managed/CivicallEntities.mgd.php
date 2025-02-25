@@ -4,7 +4,7 @@
 // It needs to prevent overriding value(OptionValue.value) by mgd file.
 $outgoingCallOptionValueName = 'Outgoing Call';
 $outgoingCallOptionValueValue = 1000;
-$optionValue = \Civi\Api4\OptionValue::get()
+$optionValue = \Civi\Api4\OptionValue::get(FALSE)
   ->addWhere('option_group_id:name', '=', 'activity_type')
   ->addWhere('name', '=', $outgoingCallOptionValueName)
   ->execute()
@@ -17,7 +17,7 @@ if (!empty($optionValue['value'])) {
 // It needs to prevent overriding value(OptionValue.value) by mgd file.
 $responseOptionValueName = 'Response';
 $responseOptionValueValue = 1100;
-$optionValue = \Civi\Api4\OptionValue::get()
+$optionValue = \Civi\Api4\OptionValue::get(FALSE)
   ->addWhere('option_group_id:name', '=', 'activity_type')
   ->addWhere('name', '=', $responseOptionValueName)
   ->execute()
