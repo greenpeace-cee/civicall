@@ -361,7 +361,7 @@ return [
       'version' => 4,
       'values' => [
         'custom_group_id.name' => 'activity_tmresponses',
-        'name' => 'civicall_schedule_date',
+        'name' => 'schedule_date',
         'label' => 'Schedule Date',
         'data_type' => 'Date',
         'html_type' => 'Select Date',
