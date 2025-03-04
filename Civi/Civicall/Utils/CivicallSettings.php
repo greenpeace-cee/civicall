@@ -28,7 +28,7 @@ class CivicallSettings {
   }
 
   public static function getCallConfigurationCustomFieldId() {
-    $configurationCustomField = \Civi\Api4\CustomField::get()
+    $configurationCustomField = \Civi\Api4\CustomField::get(FALSE)
       ->addSelect( 'id', 'custom_group_id')
       ->addWhere('custom_group_id:name', '=', 'civicall_call_configuration')
       ->addWhere('name', '=', 'configuration')

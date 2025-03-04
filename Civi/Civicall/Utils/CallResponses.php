@@ -99,7 +99,7 @@ class CallResponses {
       return;
     }
 
-    $optionValues = OptionValue::get()
+    $optionValues = OptionValue::get(FALSE)
       ->addSelect('id', 'label', 'name', 'value')
       ->addWhere('option_group_id:name', '=', CallResponses::RESPONSES_OPTION_GROUP_NAME)
       ->execute();
@@ -128,7 +128,7 @@ class CallResponses {
   }
 
   public static function getCallResponsesOptionGroupId() {
-    $optionGroup = OptionGroup::get()
+    $optionGroup = OptionGroup::get(FALSE)
       ->addSelect('id')
       ->addWhere('name', '=', CallResponses::RESPONSES_OPTION_GROUP_NAME)
       ->execute()

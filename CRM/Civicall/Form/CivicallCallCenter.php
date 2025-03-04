@@ -155,16 +155,15 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Core_Form {
     $responseActivityIds = CivicallUtils::getRelatedResponseActivities($this->activity['id']);
 
     foreach ($responseActivityIds as $responseActivityId) {
-      Activity::delete()->addWhere('id', '=', $responseActivityId)->execute();
+      Activity::delete(FALSE)->addWhere('id', '=', $responseActivityId)->execute();
     }
 
-    Activity::update()
+    Activity::update(FALSE)
       ->addWhere('id', '=', $this->activity['id'])
       ->addValue('status_id:name', 'Scheduled')
       ->addValue('activity_tmresponses.response_date', null)
       ->addValue('activity_tmresponses.response', null)
       ->addValue('details', $values['notes'])
-      ->addValue('activity_date_time', $values['reopen_scheduled_call_date'])
       ->addValue('activity_tmresponses.response_counter', $callLogsCount)
       ->addValue('activity_tmresponses.civicall_schedule_date', $values['reopen_scheduled_call_date'])
       ->execute();
@@ -173,12 +172,12 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Core_Form {
   private function runUpdateCallResponseAction($values) {
     $callLogId = CivicallUtils::getLastCallLogId($values['activity_id']);
 
-    CallLog::update()
+    CallLog::update(FALSE)
       ->addWhere('id', '=', $callLogId)
       ->addValue('call_response_id', $values['new_final_call_response'])
       ->execute();
 
-    Activity::update()
+    Activity::update(FALSE)
       ->addWhere('id', '=', $this->activity['id'])
       ->addValue('status_id:name', 'Scheduled')
       ->addValue('activity_tmresponses.response', $values['new_final_call_response'])
@@ -189,7 +188,7 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Core_Form {
   private function runRescheduleCallAction($values) {
     $startCallDate = CivicallUtils::convertTimestampToDateTimeObject(($values['start_call_time_timestamp'] ?? null));
 
-    CallLog::create()
+    CallLog::create(FALSE)
       ->addValue('activity_id', $values['activity_id'])
       ->addValue('call_start_date', $startCallDate->format('Y-m-d H:i:s'))
       ->addValue('call_end_date', (new DateTime)->format('Y-m-d H:i:s'))
@@ -199,9 +198,8 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Core_Form {
 
     $callLogsCount = CallLogsUtils::getActivityCallLogsCount($this->activity['id']);
 
-    Activity::update()
+    Activity::update(FALSE)
       ->addWhere('id', '=', $this->activity['id'])
-      ->addValue('activity_date_time', $values['scheduled_call_date'])
       ->addValue('status_id:name', 'Scheduled')
       ->addValue('activity_tmresponses.civicall_schedule_date', $values['scheduled_call_date'])
       ->addValue('details', $values['notes'])
@@ -214,7 +212,7 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Core_Form {
   private function runCloseCallAction($values) {
     $startCallDate = CivicallUtils::convertTimestampToDateTimeObject(($values['start_call_time_timestamp'] ?? null));
 
-    CallLog::create()
+    CallLog::create(FALSE)
       ->addValue('activity_id', $values['activity_id'])
       ->addValue('call_start_date', $startCallDate->format('Y-m-d H:i:s'))
       ->addValue('call_end_date', (new DateTime)->format('Y-m-d H:i:s'))
@@ -224,7 +222,7 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Core_Form {
 
     $callLogsCount = CallLogsUtils::getActivityCallLogsCount($this->activity['id']);
 
-    Activity::update()
+    Activity::update(FALSE)
       ->addWhere('id', '=', $this->activity['id'])
       ->addValue('status_id:name', 'Completed')
       ->addValue('activity_tmresponses.response_date', $values['response_call_date'])
@@ -235,9 +233,8 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Core_Form {
 
     $finalCallResponse = CallResponses::getResponseByValue($values['final_call_response']);
 
-    $responseActivity = Activity::create()
+    $responseActivity = Activity::create(FALSE)
       ->addValue('activity_type_id:name', CivicallSettings::RESPONSE_CALL_ACTIVITY_TYPE)
-      ->addValue('activity_type_id:description', 'Response Outgoing Call, activity_id=' . $this->activity['id'])
       ->addValue('subject', $finalCallResponse['label'])
       ->addValue('activity_date_time', $values['response_call_date'])
       ->addValue('campaign_id', $this->targetCampaign['id'])

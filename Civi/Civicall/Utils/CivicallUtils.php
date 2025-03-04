@@ -14,7 +14,7 @@ use Exception;
 class CivicallUtils {
 
   public static function getCivicallActivities($params) {
-    $activityEntity = Activity::get();
+    $activityEntity = Activity::get(FALSE);
     $activityEntity->addSelect('id', 'subject', 'campaign_id');
     $activityEntity->addWhere('activity_type_id:name', '=', CivicallSettings::OUTGOING_CALL_ACTIVITY_TYPE);
 
@@ -66,7 +66,7 @@ class CivicallUtils {
 
     $contactId = CivicallUtils::getActivityTargetContactId($activityId);
     $contactDisplayName = '';
-    $contact = \Civi\Api4\Contact::get()
+    $contact = \Civi\Api4\Contact::get(FALSE)
       ->addSelect('display_name')
       ->addWhere('id', '=', $contactId)
       ->setLimit(1)
@@ -95,7 +95,7 @@ class CivicallUtils {
       return $targetCampaign;
     }
 
-    $activity = \Civi\Api4\Activity::get()
+    $activity = \Civi\Api4\Activity::get(FALSE)
       ->addSelect('campaign_id')
       ->addWhere('id', '=', $activityId)
       ->setLimit(1)
@@ -106,7 +106,7 @@ class CivicallUtils {
       return $targetCampaign;
     }
 
-    $campaign = \Civi\Api4\Campaign::get()
+    $campaign = \Civi\Api4\Campaign::get(FALSE)
       ->addSelect('title', 'id')
       ->addWhere('id', '=', $activity['campaign_id'])
       ->setLimit(1)
@@ -126,7 +126,7 @@ class CivicallUtils {
       return $preparedPhones;
     }
 
-    $phones = \Civi\Api4\Phone::get()
+    $phones = \Civi\Api4\Phone::get(FALSE)
       ->addSelect('label', 'phone', 'phone_numeric', 'is_primary', 'location_type_id:label', 'phone_type_id:label')
       ->addWhere('contact_id', '=', $contactId)
       ->addOrderBy('is_primary', 'DESC')
@@ -153,7 +153,7 @@ class CivicallUtils {
 
     $targetContactRecordTypeId = CRM_Core_PseudoConstant::getKey('CRM_Activity_BAO_ActivityContact', 'record_type_id', 'Activity Targets');
 
-    $activityContact = \Civi\Api4\ActivityContact::get()
+    $activityContact = \Civi\Api4\ActivityContact::get(FALSE)
       ->addSelect('contact_id')
       ->addWhere('activity_id', '=', $activityId)
       ->addWhere('record_type_id', '=', $targetContactRecordTypeId)
@@ -172,7 +172,7 @@ class CivicallUtils {
       return [];
     }
 
-    $activity = Activity::get()
+    $activity = Activity::get(FALSE)
       ->addSelect(
         'id',
         'details',
@@ -198,7 +198,7 @@ class CivicallUtils {
   }
 
   public static function linkActivity($childActivityId, $parentActivityId) {
-    $activity = Activity::update();
+    $activity = Activity::update(FALSE);
     $activity->addWhere('id', '=', $childActivityId);
 
     if (CivicallUtils::isActivityHasHierarchyCustomField()) {
@@ -211,7 +211,7 @@ class CivicallUtils {
   }
 
   public static function isCallAlreadyClosed($activityId) {
-    $activity = Activity::get()
+    $activity = Activity::get(FALSE)
       ->addSelect(  'status_id:name', 'activity_tmresponses.response')
       ->addWhere('id', '=', $activityId)
       ->execute()
@@ -247,7 +247,7 @@ class CivicallUtils {
   public static function isActivityHasHierarchyCustomField() {
     $isActivityHasHierarchyCustomField = false;
 
-    $customField = CustomField::get()
+    $customField = CustomField::get(FALSE)
       ->addWhere('custom_group_id:name', '=', 'activity_hierarchy')
       ->addWhere('name', '=', 'parent_activity_id')
       ->addWhere('custom_group_id.extends', '=', 'Activity')
@@ -268,7 +268,7 @@ class CivicallUtils {
       return $responseActivityIds;
     }
 
-    $activityEntity = Activity::get();
+    $activityEntity = Activity::get(FALSE);
     $activityEntity->addSelect('id', 'subject', 'campaign_id');
     $activityEntity->addWhere('activity_type_id:name', '=', CivicallSettings::RESPONSE_CALL_ACTIVITY_TYPE);
 
@@ -292,7 +292,7 @@ class CivicallUtils {
       return null;
     }
 
-    $callLog = CallLog::get()
+    $callLog = CallLog::get(FALSE)
       ->addSelect('id')
       ->addWhere('activity_id', '=', $activityId)
       ->addOrderBy('id', 'DESC')
@@ -312,7 +312,7 @@ class CivicallUtils {
       return false;
     }
 
-    $activity = Activity::get()
+    $activity = Activity::get(FALSE)
       ->addSelect('id')
       ->addWhere('activity_type_id:name', '=', CivicallSettings::OUTGOING_CALL_ACTIVITY_TYPE)
       ->addWhere('id', '=', $activityId)
@@ -343,7 +343,7 @@ class CivicallUtils {
 
     $isEnabledFieldName = 'campaign_id.civicall_call_configuration.is_call_center_enabled';
 
-    $activity = Activity::get()
+    $activity = Activity::get(FALSE)
       ->addSelect($isEnabledFieldName, 'id')
       ->addWhere('id', '=', $activityId)
       ->execute()

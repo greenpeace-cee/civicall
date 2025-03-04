@@ -15,13 +15,13 @@ class CallLogsUtils {
     }
 
     $callCount = 1;
-    $callLogs = CallLog::get()
+    $callLogs = CallLog::get(FALSE)
       ->addWhere('activity_id', '=', $activityId)
       ->execute();
 
     foreach ($callLogs as $callLog) {
       $contactId = $callLog['created_id'];
-      $contact = \Civi\Api4\Contact::get()
+      $contact = \Civi\Api4\Contact::get(FALSE)
         ->addSelect('display_name')
         ->addWhere('id', '=', $contactId)
         ->setLimit(1)
@@ -61,7 +61,7 @@ class CallLogsUtils {
       return 0;
     }
 
-    return CallLog::get()
+    return CallLog::get(FALSE)
       ->addWhere('activity_id', '=', $activityId)
       ->execute()
       ->count();
