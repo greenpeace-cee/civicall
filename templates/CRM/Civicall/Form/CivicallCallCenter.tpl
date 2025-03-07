@@ -270,11 +270,10 @@
         const startTimeMilliseconds = Date.now();
 
         civicallSetInterval('#callCenterCurrentCallTimer', function () {
-          let elapsedTimeMilliseconds = Date.now() - startTimeMilliseconds;
-          let elapsedTimeSeconds = (elapsedTimeMilliseconds / 1000).toFixed(0);
-          let minutes = parseInt((elapsedTimeSeconds / 60).toFixed(0));
-          let seconds = elapsedTimeSeconds % 60;
           let message = '';
+          let elapsedTimeMilliseconds = Date.now() - startTimeMilliseconds;
+          let seconds = Math.floor(elapsedTimeMilliseconds / 1000) % 60;
+          let minutes = Math.floor(elapsedTimeMilliseconds / 60000);
 
           if (minutes !== 0) {
             message += minutes + ' minute' + ((minutes === 1) ? '' : 's') + ' ';
