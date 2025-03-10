@@ -284,6 +284,10 @@ class CivicallUtils {
       $responseActivityIds[] = $activity['id'];
     }
 
+    if (count($responseActivityIds) > 1) {
+      \Civi::log()->warning('Found more than one Response activity for Outgoing Call activity '. $activityId);
+    }
+
     return $responseActivityIds;
   }
 

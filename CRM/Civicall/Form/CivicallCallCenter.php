@@ -177,11 +177,23 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Core_Form {
       ->addValue('call_response_id', $values['new_final_call_response'])
       ->execute();
 
+    // TODO: update response_date
     Activity::update(FALSE)
       ->addWhere('id', '=', $this->activity['id'])
       ->addValue('activity_tmresponses.response', $values['new_final_call_response'])
       ->addValue('details', $values['notes'])
       ->execute();
+
+    $responseActivityIds = CivicallUtils::getRelatedResponseActivities($this->activity['id']);
+    $finalCallResponse = CallResponses::getResponseByValue($values['new_final_call_response']);
+    foreach ($responseActivityIds as $responseActivityId) {
+      // TODO: update activity_date_time
+      Activity::update(FALSE)
+        ->addValue('subject', $finalCallResponse['label'])
+        ->addWhere('id', '=', $responseActivityId)
+        ->execute()
+        ->first();
+    }
   }
 
   private function runRescheduleCallAction($values) {
