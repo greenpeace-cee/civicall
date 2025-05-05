@@ -151,7 +151,7 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Core_Form {
     parent::postProcess();
   }
 
-  private function runReopenCallAction($values) {
+  private function runReopenCallAction(array $values): void {
     $callLogsCount = CallLogsUtils::getActivityCallLogsCount($this->activity['id']);
     $responseActivityIds = CivicallUtils::getRelatedResponseActivities($this->activity['id']);
 
@@ -172,7 +172,7 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Core_Form {
     UserCallMessages::makeReopenCallMessage($this->activity['id']);
   }
 
-  private function runUpdateCallResponseAction($values) {
+  private function runUpdateCallResponseAction(array $values): void {
     $callLogId = CivicallUtils::getLastCallLogId($values['activity_id']);
 
     CallLog::update(FALSE)
@@ -197,10 +197,11 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Core_Form {
         ->execute()
         ->first();
     }
-    UserCallMessages::makeUpdateCallResponseMessage($this->activity['id']);
+
+    UserCallMessages::makeUpdateCallResponseMessage($this->activity['id'], $finalCallResponse);
   }
 
-  private function runScheduleCallAction($values) {
+  private function runScheduleCallAction(array $values) {
     $startCallDate = CivicallUtils::convertTimestampToDateTimeObject(($values['start_call_time_timestamp'] ?? null));
 
     CallLog::create(FALSE)
@@ -221,10 +222,14 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Core_Form {
       ->addValue('activity_tmresponses.response_counter', $callLogsCount)
       ->execute();
 
-    UserCallMessages::makeScheduleCallMessage($this->activity['id'], $values['scheduled_call_date'], $values['preliminary_call_response']);
+    UserCallMessages::makeScheduleCallMessage(
+      $this->activity['id'],
+      $values['scheduled_call_date'],
+      $this->callCenterConfiguration->getPreliminaryResponseOption($values['preliminary_call_response'])
+    );
   }
 
-  private function runCloseCallAction($values) {
+  private function runCloseCallAction(array $values): void {
     $startCallDate = CivicallUtils::convertTimestampToDateTimeObject(($values['start_call_time_timestamp'] ?? null));
 
     CallLog::create(FALSE)
@@ -259,8 +264,7 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Core_Form {
       ->first();
 
     CivicallUtils::linkActivity($responseActivity['id'], $this->activity['id']);
-
-    UserCallMessages::makeCloseCallMessage($this->activity['id'], $values['final_call_response']);
+    UserCallMessages::makeCloseCallMessage($this->activity['id'], $finalCallResponse);
   }
 
   public function addRules() {
@@ -330,7 +334,7 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Core_Form {
     return $defaults;
   }
 
-  public function showError($message) {
+  public function showError(string $message): void {
     // To show error message redirect to error page. Exception messages doesn't show at popups.
     if ($this->isFormInPopup) {
       CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/civicall/error', 'reset=1&error-message=' . urlencode($message)));
@@ -339,7 +343,7 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Core_Form {
     throw new Exception($message);
   }
 
-  private function fixFormRedirection() {
+  private function fixFormRedirection(): void {
     $session = CRM_Core_Session::singleton();
     $this->context = CRM_Utils_System::url('civicrm/civicall/call-center', "reset=1&activity_id={$this->activity['id']}");
     $session->pushUserContext($this->context);

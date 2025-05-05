@@ -197,7 +197,7 @@
                         </div>
 
                         <div class="call-center__action-row-item">
-                          <button class="btn btn-secondary" value="1" type="submit" name="{$reopenCallButtonName}" id="{$reopenCallButtonName}-bottom">
+                          <button class="btn btn-secondary cc__m-0" value="1" type="submit" name="{$reopenCallButtonName}" id="{$reopenCallButtonName}-bottom">
                             <i class="crm-i fa-calendar"></i>
                             <span>SAVE AND REOPEN CALL</span>
                           </button>
@@ -221,7 +221,7 @@
                         </div>
 
                         <div class="call-center__action-row-item">
-                          <button class="btn btn-success" value="1" type="submit" name="{$updateCallResponseButtonName}" id="{$updateCallResponseButtonName}-bottom">
+                          <button class="btn btn-success cc__m-0" value="1" type="submit" name="{$updateCallResponseButtonName}" id="{$updateCallResponseButtonName}-bottom">
                             <i class="crm-i fa-check"></i>
                             <span>SAVE AND UPDATE CALL RESPONSE</span>
                           </button>

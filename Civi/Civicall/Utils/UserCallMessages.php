@@ -7,46 +7,47 @@ use CRM_Utils_System;
 
 class UserCallMessages {
 
-  public static function makeScheduleCallMessage(int $callCenterActivityId, $scheduleCallDateTime, string $preliminaryResponse): void {
-    $message = E::ts('<div>Call with %1 re-scheduled for %2.</div> <div>Preliminary Response: %3.</div>', [
+  public static function makeScheduleCallMessage(int $callCenterActivityId, string $scheduleCallDateTime, array $preliminaryResponseOption): void {
+    $message = E::ts('<div>Call with %1 re-scheduled for %2.</div> <div>Preliminary Response:"%4 %3".</div>', [
       1 => self::getLoggedInContactHtmlLink(),
       2 => $scheduleCallDateTime,
-      3 => $preliminaryResponse,
+      3 => $preliminaryResponseOption['text'],
+      4 => self::prepareResponseIcon($preliminaryResponseOption),
     ]);
-    $message .= self::getCallCenterHtmlMessageWithLink($callCenterActivityId);
+    $message .= '<br/>' . self::getCallCenterHtmlMessageWithLink($callCenterActivityId);
 
-    CRM_Core_Session::setStatus($message,E::ts("Call is rescheduled!"), 'success');
+    CRM_Core_Session::setStatus($message, E::ts("Call is rescheduled!"), 'success');
   }
 
-  public static function makeCloseCallMessage(int $callCenterActivityId, $finalCallResponse): void {
-    $message = E::ts('<div>Call is closed by %2.</div><div> Response: %3.</div>', [
-      1 => self::getCallCenterLink($callCenterActivityId),
-      2 => self::getLoggedInContactHtmlLink(),
-      3 => $finalCallResponse,
+  public static function makeCloseCallMessage(int $callCenterActivityId, array $finalCallResponseOption): void {
+    $message = E::ts('<div>Call is closed by %1.</div><div> Response: "%3 %2".</div>', [
+      1 => self::getLoggedInContactHtmlLink(),
+      2 => $finalCallResponseOption['label'],
+      3 => self::prepareResponseIcon($finalCallResponseOption),
     ]);
-    $message .= self::getCallCenterHtmlMessageWithLink($callCenterActivityId);
+    $message .= '<br/>' . self::getCallCenterHtmlMessageWithLink($callCenterActivityId);
 
     CRM_Core_Session::setStatus($message, E::ts("Closed call and saved!"), 'success');
   }
 
   public static function makeReopenCallMessage(int $callCenterActivityId): void {
-    $message = E::ts('<div>Call is reopened by %2.</div>', [
-      1 => self::getCallCenterLink($callCenterActivityId),
-      2 => self::getLoggedInContactHtmlLink(),
+    $message = E::ts('<div>Call is reopened by %1.</div>', [
+      1 => self::getLoggedInContactHtmlLink(),
     ]);
-    $message .= self::getCallCenterHtmlMessageWithLink($callCenterActivityId);
+    $message .= '<br/>' . self::getCallCenterHtmlMessageWithLink($callCenterActivityId);
 
     CRM_Core_Session::setStatus($message, E::ts("Call is reopened!"), 'success');
   }
 
-  public static function makeUpdateCallResponseMessage(int $callCenterActivityId): void {
-    $message = E::ts('<div>Call response is updated by %2.</div>', [
-      1 => self::getCallCenterLink($callCenterActivityId),
-      2 => self::getLoggedInContactHtmlLink(),
+  public static function makeUpdateCallResponseMessage(int $callCenterActivityId, array $finalCallResponseOption): void {
+    $message = E::ts('<div>Call response is updated by %1. New call response: "%3 %2"</div>', [
+      1 => self::getLoggedInContactHtmlLink(),
+      2 => $finalCallResponseOption['label'],
+      3 => self::prepareResponseIcon($finalCallResponseOption),
     ]);
-    $message .= self::getCallCenterHtmlMessageWithLink($callCenterActivityId);
+    $message .= '<br/>' . self::getCallCenterHtmlMessageWithLink($callCenterActivityId);
 
-    CRM_Core_Session::setStatus($message, E::ts("Updated call response!"),'success');
+    CRM_Core_Session::setStatus($message, E::ts("Updated call response!"), 'success');
   }
 
   private static function getLoggedInContactHtmlLink(): string {
@@ -60,6 +61,10 @@ class UserCallMessages {
     return E::ts('<div>You can open this call <a href="%1" target="_blank">here</a>.</div>', [
       1 =>CRM_Utils_System::url('civicrm/civicall/call-center', "reset=1&activity_id={$callCenterActivityId}"),
     ]);
+  }
+
+  private static function prepareResponseIcon(array $option): string {
+    return (!empty($option['icon'])) ? '<i class="crm-i ' . $option['icon'] . '"></i>' : '';
   }
 
 }

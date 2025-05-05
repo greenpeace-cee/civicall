@@ -68,7 +68,10 @@ class CRM_Civicall_Form_CivicallDashboard extends CRM_Core_Form {
   }
 
   public function setDefaultValues() {
-
+    echo '<pre>';
+    var_dump(json_encode(array_values(CallResponses::getAvailableResponsesNames())));
+    echo '</pre>';
+    exit();
     return [
       'target_contact_id' =>  $this->searchParams['target_contact_id'] ?? null,
       'activity_limit' => $this->searchParams['limit'],
