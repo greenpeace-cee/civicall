@@ -351,6 +351,17 @@ class CallCenterConfiguration {
     return $this->configuration['preliminaryResponse']['options'];
   }
 
+  public function getPreliminaryResponseOption(string $preliminaryResponseId): array {
+    $preliminaryResponseOptions = $this->getPreliminaryResponseOptions();
+    foreach ($preliminaryResponseOptions as $option) {
+      if ($option['id'] == $preliminaryResponseId) {
+        return $option;
+      }
+    }
+
+    return [];
+  }
+
   public function getAllConfiguration() {
     return $this->configuration;
   }

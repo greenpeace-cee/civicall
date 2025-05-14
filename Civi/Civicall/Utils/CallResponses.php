@@ -87,6 +87,7 @@ class CallResponses {
         $select2Options[] = [
           'id' => CallResponses::$responses[$responseName]['value'],
           'text' => CallResponses::$responses[$responseName]['label'],
+          'icon' => CallResponses::$responses[$responseName]['icon'],
         ];
       }
     }
@@ -100,7 +101,7 @@ class CallResponses {
     }
 
     $optionValues = OptionValue::get(FALSE)
-      ->addSelect('id', 'label', 'name', 'value')
+      ->addSelect('id', 'label', 'name', 'value', 'icon')
       ->addWhere('option_group_id:name', '=', CallResponses::RESPONSES_OPTION_GROUP_NAME)
       ->execute();
 
@@ -112,6 +113,7 @@ class CallResponses {
         'label' => $optionValue['label'],
         'name' => $optionValue['name'],
         'value' => $optionValue['value'],
+        'icon' => !empty($optionValue['icon']) ? $optionValue['icon'] : '',
       ];
     }
   }

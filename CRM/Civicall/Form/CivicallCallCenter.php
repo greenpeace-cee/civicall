@@ -8,6 +8,7 @@ use Civi\Civicall\Utils\CallLogsUtils;
 use Civi\Civicall\Utils\CallResponses;
 use Civi\Civicall\Utils\CivicallSettings;
 use Civi\Civicall\Utils\CivicallUtils;
+use Civi\Civicall\Utils\UserCallMessages;
 use CRM_Civicall_ExtensionUtil as E;
 
 class CRM_Civicall_Form_CivicallCallCenter extends CRM_Core_Form {
@@ -95,23 +96,23 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Core_Form {
     $preliminaryResponseOptions = $this->callCenterConfiguration->getPreliminaryResponseOptions();
     $finalResponseOptions = $this->callCenterConfiguration->getAvailableResponseOptions();
 
-    $this->add('textarea', 'notes', ts('Notes'), ['cols' => 50, 'rows' => 6, 'class' => 'civicall__input civicall--textarea civicall--width-100-percent']);
-    $this->add('datepicker', 'scheduled_call_date', 'Scheduled Call Date', ['class' => 'civicall__input civicall--datepicker'], FALSE, ['minDate' => date('Y-m-d')]);
-    $this->add('datepicker', 'response_call_date', 'Response Date', ['class' => 'civicall__input civicall--datepicker'], FALSE, ['minDate' => date('Y-m-d')]);
+    $this->add('textarea', 'notes', ts('Notes'), ['cols' => 50, 'rows' => 6, 'class' => 'civicall--width-100-percent']);
+    $this->add('datepicker', 'scheduled_call_date', 'Scheduled Call Date', ['class' => ''], FALSE, ['minDate' => date('Y-m-d')]);
+    $this->add('datepicker', 'response_call_date', 'Response Date', ['class' => ''], FALSE, ['minDate' => date('Y-m-d')]);
     $this->add('text', 'start_call_time_timestamp', '');
     $this->add('text', 'activity_id', '');
-    $this->add('datepicker', 'reopen_scheduled_call_date', 'Reopen Schedule Date', ['class' => 'civicall__input civicall--datepicker'], FALSE, ['minDate' => date('Y-m-d')]);
+    $this->add('datepicker', 'reopen_scheduled_call_date', 'Reopen Schedule Date', ['class' => ''], FALSE, ['minDate' => date('Y-m-d')]);
 
     $this->add('select2', 'new_final_call_response', 'New final response', $finalResponseOptions, FALSE, [
-      'class' => 'civicall__input civicall--single-select',
+      'class' => '',
       'placeholder' => ts('- select response -')
     ]);
     $this->add('select2', 'preliminary_call_response', 'Preliminary response', $preliminaryResponseOptions, FALSE, [
-      'class' => 'civicall__input civicall--single-select',
+      'class' => '',
       'placeholder' => ts('- select response -')
     ]);
     $this->add('select2', 'final_call_response', 'Final response', $finalResponseOptions, FALSE, [
-      'class' => 'civicall__input civicall--single-select',
+      'class' => '',
       'placeholder' => ts('- select response -')
     ]);
 
@@ -135,7 +136,7 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Core_Form {
     $values = $this->exportValues();
 
     if (CallCenterActions::isAction($values, CallCenterActions::RESCHEDULE_CALL) && !$this->isCallAlreadyClosed) {
-      $this->runRescheduleCallAction($values);
+      $this->runScheduleCallAction($values);
     } elseif (CallCenterActions::isAction($values,CallCenterActions::CLOSE_CALL) && !$this->isCallAlreadyClosed) {
       $this->runCloseCallAction($values);
     } elseif (CallCenterActions::isAction($values,CallCenterActions::REOPEN_CALL) && $this->isCallAlreadyClosed) {
@@ -150,7 +151,7 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Core_Form {
     parent::postProcess();
   }
 
-  private function runReopenCallAction($values) {
+  private function runReopenCallAction(array $values): void {
     $callLogsCount = CallLogsUtils::getActivityCallLogsCount($this->activity['id']);
     $responseActivityIds = CivicallUtils::getRelatedResponseActivities($this->activity['id']);
 
@@ -167,9 +168,11 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Core_Form {
       ->addValue('activity_tmresponses.response_counter', $callLogsCount)
       ->addValue('activity_tmresponses.schedule_date', $values['reopen_scheduled_call_date'])
       ->execute();
+
+    UserCallMessages::makeReopenCallMessage($this->activity['id']);
   }
 
-  private function runUpdateCallResponseAction($values) {
+  private function runUpdateCallResponseAction(array $values): void {
     $callLogId = CivicallUtils::getLastCallLogId($values['activity_id']);
 
     CallLog::update(FALSE)
@@ -194,9 +197,11 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Core_Form {
         ->execute()
         ->first();
     }
+
+    UserCallMessages::makeUpdateCallResponseMessage($this->activity['id'], $finalCallResponse);
   }
 
-  private function runRescheduleCallAction($values) {
+  private function runScheduleCallAction(array $values) {
     $startCallDate = CivicallUtils::convertTimestampToDateTimeObject(($values['start_call_time_timestamp'] ?? null));
 
     CallLog::create(FALSE)
@@ -217,10 +222,14 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Core_Form {
       ->addValue('activity_tmresponses.response_counter', $callLogsCount)
       ->execute();
 
-    CRM_Core_Session::setStatus(E::ts("Call is rescheduled!"), E::ts('Success'), 'success');
+    UserCallMessages::makeScheduleCallMessage(
+      $this->activity['id'],
+      $values['scheduled_call_date'],
+      $this->callCenterConfiguration->getPreliminaryResponseOption($values['preliminary_call_response'])
+    );
   }
 
-  private function runCloseCallAction($values) {
+  private function runCloseCallAction(array $values): void {
     $startCallDate = CivicallUtils::convertTimestampToDateTimeObject(($values['start_call_time_timestamp'] ?? null));
 
     CallLog::create(FALSE)
@@ -255,8 +264,7 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Core_Form {
       ->first();
 
     CivicallUtils::linkActivity($responseActivity['id'], $this->activity['id']);
-
-    CRM_Core_Session::setStatus(E::ts("Closed call and saved!"), E::ts('Success'), 'success');
+    UserCallMessages::makeCloseCallMessage($this->activity['id'], $finalCallResponse);
   }
 
   public function addRules() {
@@ -326,7 +334,7 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Core_Form {
     return $defaults;
   }
 
-  public function showError($message) {
+  public function showError(string $message): void {
     // To show error message redirect to error page. Exception messages doesn't show at popups.
     if ($this->isFormInPopup) {
       CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/civicall/error', 'reset=1&error-message=' . urlencode($message)));
@@ -335,7 +343,7 @@ class CRM_Civicall_Form_CivicallCallCenter extends CRM_Core_Form {
     throw new Exception($message);
   }
 
-  private function fixFormRedirection() {
+  private function fixFormRedirection(): void {
     $session = CRM_Core_Session::singleton();
     $this->context = CRM_Utils_System::url('civicrm/civicall/call-center', "reset=1&activity_id={$this->activity['id']}");
     $session->pushUserContext($this->context);

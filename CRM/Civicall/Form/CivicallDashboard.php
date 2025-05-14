@@ -26,10 +26,10 @@ class CRM_Civicall_Form_CivicallDashboard extends CRM_Core_Form {
   }
 
   public function buildQuickForm(): void {
-    $this->add('number', 'activity_limit', 'Limit', ['min' => 1, 'class' => 'civicall__input civicall--width-150']);
-    $this->add('textarea', 'available_responses', 'Available call responses:', ['cols' => 50, 'rows' => 6, 'class' => 'civicall__input civicall--textarea']);
-    $this->add('textarea', 'call_config_example', 'Call config example:', ['cols' => 50, 'rows' => 6, 'class' => 'civicall__input civicall--textarea']);
-    $this->addEntityRef('target_contact_id', 'Target contact', ['entity' => 'Contact', 'class' => 'civicall__input civicall--single-select civicall--width-150']);
+    $this->add('number', 'activity_limit', 'Limit', ['min' => 1, 'class' => 'civicall--width-150']);
+    $this->add('textarea', 'available_responses', 'Available call responses:', ['cols' => 50, 'rows' => 6, 'class' => '']);
+    $this->add('textarea', 'call_config_example', 'Call config example:', ['cols' => 50, 'rows' => 6, 'class' => '']);
+    $this->addEntityRef('target_contact_id', 'Target contact', ['entity' => 'Contact', 'class' => 'civicall--width-150']);
     $this->addButtons([
       [
         'type' => 'submit',
@@ -68,7 +68,6 @@ class CRM_Civicall_Form_CivicallDashboard extends CRM_Core_Form {
   }
 
   public function setDefaultValues() {
-
     return [
       'target_contact_id' =>  $this->searchParams['target_contact_id'] ?? null,
       'activity_limit' => $this->searchParams['limit'],

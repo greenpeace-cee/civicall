@@ -1,4 +1,19 @@
-$notesIconHeight: 12px
+$notesIconHeight: 14px
+
+.notes__save-notes-button
+  display: none !important
+  .notes__save-notes-button-saving-message
+    display: none
+  .notes__save-notes-button-unsave-message
+    display: block
+  &.notes--loading
+    display: flex !important
+    .notes__save-notes-button-saving-message
+      display: block
+    .notes__save-notes-button-unsave-message
+      display: none
+  &.notes--unsaved
+    display: flex !important
 
 .notes__auto-save-status
   width: $notesIconHeight
@@ -7,7 +22,7 @@ $notesIconHeight: 12px
   position: relative
   display: flex
   align-items: center
-  justify-content: center
+  justify-content: space-between
   &.notes--saved
     .notes__status-icon-saved
       transition: 1s linear opacity
@@ -56,9 +71,10 @@ $notesIconHeight: 12px
   gap: 5px
   align-items: center
   padding-bottom: 10px
+  height: 40px
 
 .notes__textarea-wrap
-  max-width: 600px
+  max-width: 705px
 
 .notes__title
   font-size: 16px

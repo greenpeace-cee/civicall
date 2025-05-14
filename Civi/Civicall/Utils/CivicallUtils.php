@@ -186,7 +186,7 @@ class CivicallUtils {
 
     if (!empty($activity)) {
       return [
-        'id' => $activity['id'],
+        'id' => (int) $activity['id'],
         'details' => $activity['details'],
         'campaignScript' => $activity['campaign_id.civicall_call_configuration.script'],
         'campaignConfiguration' => $activity['campaign_id.civicall_call_configuration.configuration'],
@@ -358,6 +358,21 @@ class CivicallUtils {
     }
 
     return false;
+  }
+
+  public static function getContactDisplayName($contactId): string {
+    $contact = \Civi\Api4\Contact::get(FALSE)
+      ->addSelect('display_name')
+      ->addWhere('id', '=', $contactId)
+      ->setLimit(1)
+      ->execute()
+      ->first();
+
+    if (!empty($contact['display_name'])) {
+      return $contact['display_name'];
+    }
+
+    return '';
   }
 
 }
